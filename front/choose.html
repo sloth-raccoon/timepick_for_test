@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Time</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fromTimeInput = document.getElementById('from-time');
+            const toTimeInput = document.getElementById('to-time');
+            const dateInput = document.getElementById('date');
+
+            // 設定今天日期為最小值
+            const today = new Date();
+            const todayString = today.toISOString().split('T')[0]; // 格式化為 YYYY-MM-DD
+            dateInput.setAttribute('min', todayString);
+
+            // 允許跨月份選擇
+            dateInput.addEventListener('focus', () => {
+                const maxDate = new Date(today);
+                maxDate.setMonth(today.getMonth() + 1); // 增加一個月
+                const maxDateString = maxDate.toISOString().split('T')[0];
+                dateInput.setAttribute('max', maxDateString);
+            });
+
+            // 設定 To 時間邏輯
+            fromTimeInput.addEventListener('change', () => {
+                const fromTimeValue = fromTimeInput.value;
+                if (fromTimeValue) {
+                    const [hours, minutes] = fromTimeValue.split(':').map(Number);
+                    const toMinHours = hours + 1; // 至少一小時後
+                    toTimeInput.setAttribute('min', `${toMinHours}:${minutes.toString().padStart(2, '0')}`);
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Choose Time</h1>
+    <form>
+        <!-- Timetable Name -->
+        <label for="timetable-name">1. Timetable Name:</label>
+        <input type="text" id="timetable-name" name="timetable-name" required><br><br>
+
+        <!-- Select Available Time -->
+        <label for="from-time">2. Select Available Time:</label><br>
+        From: <input type="time" id="from-time" name="from-time" required><br>
+        To: <input type="time" id="to-time" name="to-time" required><br><br>
+
+        <!-- Select Dates -->
+        <label for="date">3. Select Dates:</label><br>
+        Date: <input type="date" id="date" name="date" required><br><br>
+
+        <!-- Confirm Button -->
+        <button type="submit">Confirm</button>
+    </form>
+</body>
+</html>
