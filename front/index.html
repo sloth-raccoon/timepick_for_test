@@ -195,7 +195,7 @@
             confirmPassword(); // Validate password
             if (username && password) {
                 localStorage.setItem('timepick_user', JSON.stringify({ username, password }));
-                window.location.href = '/Volumes/Medjed/timepick/choose.html';
+                window.location.href = 'choose.html';
             } else {
                 alert(isChinese ? langData.zh.bothError : langData.en.bothError);
             }
