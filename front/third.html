@@ -10,7 +10,7 @@
 
     <!-- Custom CSS -->
     <style>
-        body {
+                body {
             min-height: 100vh;
             background-color: #f8f9fa;
             padding-top: 40px;
@@ -41,6 +41,8 @@
         .timezone-info a:hover {
             text-decoration: underline;
         }
+        /* Original .time-table rules (partially overridden below) */
+        /*
         .time-table {
             width: 100%;
             border-collapse: collapse;
@@ -59,6 +61,7 @@
         .time-table td.available {
             background-color: #fff3cd;
         }
+        */
         .back-btn {
             background-color: #343a40;
             color: white;
@@ -66,7 +69,7 @@
             padding: 10px 20px;
             font-size: 16px;
             border-radius: 5px;
-            margin-left: 10px;
+            margin-left: 10px; /* Applied to the top button */
         }
         .back-btn:hover {
             background-color: #23272b;
@@ -77,6 +80,89 @@
             align-items: center;
             margin-bottom: 20px;
         }
+        /* --- Updated Table Styles --- */
+        .time-table {
+            width: 100%;
+            border-collapse: collapse; /* Ensure borders merge */
+            margin-top: 20px;
+            border: 1px solid #ccc; /* Add outer border to the table */
+        }
+        .time-table th {
+            border: 1px solid #ccc; /* Header cell borders */
+            text-align: center;
+            padding: 8px;
+            font-size: 14px;
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        /* Time label cells (first column) */
+        .time-table td.time-label-cell {
+            border-left: 1px solid #ccc;  /* Left border */
+            border-right: 2px solid #aaa; /* Thicker right border */
+            border-top: 1px solid #ccc;   /* Top border (solid) */
+            /* Bottom border handled by next row's top border, last row handled separately */
+            text-align: right;
+            padding: 2px 5px;
+            font-size: 12px;
+            font-weight: bold;
+            vertical-align: top;
+            background-color: #f8f9fa;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        /* Ensure the last time label has a solid bottom border */
+        .time-table tbody tr:last-child td.time-label-cell {
+             border-bottom: 1px solid #ccc;
+        }
+
+        /* Time slot cells (data area) */
+        .time-table td.time-slot {
+            border-left: 1px solid #eee; /* Light vertical grid lines */
+            /* Right border handled by next cell or table border */
+            /* Top/bottom borders handled by row rules */
+            border-top: none;
+            border-bottom: none;
+            height: 20px; /* Adjust height for 30min slots */
+            padding: 0; /* Remove padding to make lines connect */
+            background-color: white; /* Default background */
+        }
+        /* Ensure the rightmost cells have a right border */
+        .time-table td.time-slot:last-child {
+            border-right: 1px solid #ccc;
+        }
+
+        /* Rows starting an hour (:00) - solid top border */
+        .time-table tr.hour-start-row td.time-slot {
+             border-top: 1px solid #ccc; /* Solid line for hour start */
+        }
+        /* Time label cell also needs corresponding dashed bottom border (because it spans 2 rows) */
+        .time-table tr.hour-start-row td.time-label-cell {
+             border-bottom: 1px dashed #ccc; /* Dashed line below the :00 row's time label */
+        }
+
+        /* Half-hour rows (:30) - dashed top border */
+        .time-table tr.half-hour-row td.time-slot {
+            border-top: 1px dashed #ccc; /* Dashed line for half hour */
+        }
+
+        /* Last row needs a solid bottom border */
+        .time-table tbody tr:last-child td.time-slot {
+             border-bottom: 1px solid #ccc;
+        }
+
+        /* Hover effect for time slots */
+        .time-table td.time-slot:hover {
+            background-color: #e9ecef;
+            cursor: pointer; /* Indicate they might be clickable */
+        }
+
+        /* Style for selected cells (yellow background) */
+        .time-table td.time-slot.available {
+            background-color: #fff3cd !important; /* Use !important to override hover */
+        }
+
     </style>
 </head>
 <body>
@@ -161,62 +247,133 @@
         }
 
         // Display common available time
+        // Display selected time grid
         function displayCommonTime() {
-            // Get data from localStorage
+            // 1. Get data from localStorage
             const scheduleData = JSON.parse(localStorage.getItem('schedule_data')) || {};
-            const { startTime = "11:00", endTime = "14:00", selectedDates = [] } = scheduleData;
+            const {
+                timetableName = "Schedule", // Use the name from choose.html
+                startTime = "09:00",       // Default start if not found
+                endTime = "17:00",         // Default end if not found
+                selectedDates = []         // Default empty array if not found
+            } = scheduleData;
 
-            // Simulate multiple users' availability (for demo purposes)
-            const usersAvailability = [
-                { startTime: "11:00", endTime: "14:00", selectedDates: selectedDates },
-                { startTime: "12:00", endTime: "14:00", selectedDates: selectedDates }
-            ];
+            // Update Title
+            document.getElementById('title').textContent = timetableName || "Selected Time";
 
-            // Calculate common time
-            const commonStartTime = usersAvailability.reduce((latest, user) => {
-                const latestHour = parseInt(latest.split(':')[0]);
-                const userHour = parseInt(user.startTime.split(':')[0]);
-                return latestHour >= userHour ? latest : user.startTime;
-            }, usersAvailability[0].startTime);
+            // 2. Prepare Dates for Header (Sort them)
+            const dates = selectedDates
+                .map(dateStr => new Date(dateStr)) // Convert string to Date object
+                .sort((a, b) => a - b);             // Sort dates chronologically
 
-            const commonEndTime = usersAvailability.reduce((earliest, user) => {
-                const earliestHour = parseInt(earliest.split(':')[0]);
-                const userHour = parseInt(user.endTime.split(':')[0]);
-                return earliestHour <= userHour ? earliest : user.endTime;
-            }, usersAvailability[0].endTime);
-
-            // Use selected dates
-            const dates = selectedDates.map(dateStr => new Date(dateStr));
-
-            // Generate table header (dates)
+            // 3. Generate Table Header (Dates)
             const tableHead = document.querySelector('#time-table thead tr');
-            tableHead.innerHTML = '<th></th>';
+            tableHead.innerHTML = '<th></th>'; // Clear previous headers, add empty top-left cell
             dates.forEach(date => {
-                tableHead.innerHTML += `<th>${date.getMonth() + 1}/${date.getDate()}</th>`;
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                tableHead.innerHTML += `<th>${month}/${day}</th>`;
             });
 
-            // Generate table body (time slots)
+            // 4. Generate Table Body (Time Slots based on selected range and 30-min intervals)
             const tableBody = document.querySelector('#time-table tbody');
-            tableBody.innerHTML = '';
-            for (let hour = 8; hour <= 17; hour++) {
-                const row = document.createElement('tr');
-                const timeLabel = hour <= 12 ? `${hour}AM` : `${hour - 12}PM`;
-                row.innerHTML = `<td>${timeLabel}</td>`;
+            tableBody.innerHTML = ''; // Clear previous body content
 
-                const hourStr = hour.toString().padStart(2, '0') + ':00';
-                const isCommonTime = hourStr >= commonStartTime && hourStr < commonEndTime;
+            // Parse Start and End Times
+            const startHour = parseInt(startTime.split(':')[0]);
+            const endHour = parseInt(endTime.split(':')[0]); // endHour is exclusive (e.g., 13:00 means up to 12:59)
 
+            // Loop through each hour in the selected range
+            for (let hour = startHour; hour < endHour; hour++) {
+                // --- Create Row for :00 ---
+                const row00 = document.createElement('tr');
+                row00.classList.add('hour-start-row'); // Add class for potential styling
+
+                // Add Time Label Cell (spanning 2 rows)
+                const timeLabelCell = document.createElement('td');
+                timeLabelCell.rowSpan = 2; // Make the time label span both 30-min rows
+                timeLabelCell.classList.add('time-label-cell'); // Add class for styling
+
+                // Format time label (e.g., 9AM, 12PM, 1PM)
+                let timeLabel;
+                if (hour === 0) { timeLabel = '12 AM'; }
+                else if (hour < 12) { timeLabel = `${hour} AM`; }
+                else if (hour === 12) { timeLabel = '12 PM'; }
+                else { timeLabel = `${hour - 12} PM`; }
+                timeLabelCell.textContent = timeLabel;
+                row00.appendChild(timeLabelCell);
+
+                // Add data cells for :00 slot for each date
                 dates.forEach(() => {
                     const cell = document.createElement('td');
-                    if (isCommonTime) {
-                        cell.classList.add('available');
-                    }
-                    row.appendChild(cell);
+                    cell.classList.add('time-slot'); // Class for general time slots
+                    // cell.dataset.time = `${String(hour).padStart(2, '0')}:00`; // Optional: store time
+                    row00.appendChild(cell);
                 });
+                tableBody.appendChild(row00);
 
-                tableBody.appendChild(row);
+                // --- Create Row for :30 ---
+                const row30 = document.createElement('tr');
+                row30.classList.add('half-hour-row'); // Add class for dashed line styling
+
+                // Add data cells for :30 slot for each date
+                // Note: No time label cell here because the previous one has rowspan=2
+                dates.forEach(() => {
+                    const cell = document.createElement('td');
+                    cell.classList.add('time-slot'); // Class for general time slots
+                    // cell.dataset.time = `${String(hour).padStart(2, '0')}:30`; // Optional: store time
+                    row30.appendChild(cell);
+                });
+                tableBody.appendChild(row30);
             }
         }
+                // --- 新增：處理時間格子點擊事件的函式 ---
+                function setupTimeSlotClickListener() {
+            const tableBody = document.querySelector('#time-table tbody');
+
+            if (tableBody) {
+                tableBody.addEventListener('click', function(event) {
+                    // 尋找被點擊元素或其父元素中最近的 td.time-slot
+                    const targetCell = event.target.closest('td.time-slot');
+                    if (targetCell) {
+                        // 切換 'available' class
+                        targetCell.classList.toggle('available');
+                        console.log(`Toggled cell: ${targetCell.dataset.time || 'unknown time'}`); // 除錯用
+                    }
+                });
+                console.log("Time slot click listener attached."); // 確認監聽器已附加
+            } else {
+                console.error("Table body not found for attaching click listener.");
+            }
+        }
+
+        // --- 修改：window.onload ---
+        window.onload = function() {
+            isChinese = localStorage.getItem('isChinese') === 'true';
+            updateLanguage();
+            displayCommonTime(); // 先產生表格
+            setupTimeSlotClickListener(); // 再附加點擊監聽器
+        };
+
+        // --- 保留現有函式 ---
+        function updateLanguage() {
+            // ... (你的 updateLanguage 程式碼) ...
+        }
+
+        function goBack() {
+             // 建議使用相對路徑
+             window.location.href = 'choose.html';
+            // window.location.href = '/Volumes/Medjed/timepick/choose.html'; // 保留你的原始路徑如果需要
+        }
+
+        function displayCommonTime() {
+            // ... (你的 displayCommonTime 程式碼，不需要修改) ...
+            console.log("displayCommonTime finished."); // 確認表格產生完畢
+        }
+
+
+        
+
     </script>
 </body>
 </html>

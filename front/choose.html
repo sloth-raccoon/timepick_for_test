@@ -3,57 +3,410 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Choose Time</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>TimePick</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- Custom CSS -->
+    <style>
+        body {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+            padding-top: 40px;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            font-size: 36px;
+            font-weight: bold;
+            color: #67AD5B;
+            margin-bottom: 20px;
+        }
+        .container {
+            max-width: 700px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .input-group label, .time-select label, .date-label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .form-label {
+            margin-bottom: 5px;
+        }
+        .calendar-container {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+            /* 調整月曆寬度以適應內容 */
+            max-width: 350px; /* 稍微加寬 */
+            margin-bottom: 20px;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 14px; /* 可稍微加大 */
+            margin-bottom: 10px;
+        }
+        .calendar-header button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #67AD5B;
+            font-weight: bold;
+            font-size: 1.2em; /* 讓按鈕更明顯 */
+        }
+        .calendar-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .calendar-table th, .calendar-table td {
+            /* width: 40px; */ /* 移除固定寬度，讓其自適應 */
+            height: 40px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 5px; /* 增加內邊距 */
+        }
+        .calendar-table th {
+             font-weight: bold; /* 加粗星期標題 */
+             background-color: #f8f9fa; /* 淺灰色背景 */
+        }
+        .calendar-table td:hover:not(.disabled):not(.not-current-month) {
+            background-color: #e9ecef;
+        }
+        /* 使用 CSS 控制不可點擊 */
+        .calendar-table td.disabled {
+            background-color: #f8f9fa;
+            color: #ccc;
+            cursor: not-allowed;
+            pointer-events: none; /* CSS 控制不可點擊 */
+        }
+        .calendar-table td.next-month-preview {
+            color: #aaa; /* 使用稍淺的灰色文字以區分 */
+            cursor: pointer; /* 確保鼠標是可點擊樣式 */
+        }
+        .calendar-table td.next-month-preview:hover:not(.disabled) {
+            background-color: #e9ecef; /* 與當前月份日期使用相同的 hover 背景色 */
+        }
+        /* 這個 class 用於上個月的日期 */
+        .calendar-table td.not-current-month {
+            background-color: #f8f9fa; /* 淺灰色背景 */
+            color: #ccc; /* 淺灰色文字 */
+            /*cursor: not-allowed; /* 不允許的鼠標樣式 */
+            /*pointer-events: none; /* 阻止點擊事件 */ 
+        }
+        .calendar-table td.not-current-month:hover:not(.disabled) {
+            background-color: #e9ecef; /* 與其他日期使用相同的 hover 背景色 */
+        }
+        .calendar-table td.disabled {
+            background-color: #f8f9fa !important; /* 使用 !important 確保覆蓋其他背景 */
+            color: #ccc !important; /* 使用 !important 確保覆蓋其他顏色 */
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .selected {
+            background-color: #67AD5B !important;
+            color: white !important; /* 確保文字顏色是白色 */
+        }
+        .confirm-btn {
+            background-color: #67AD5B;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            color: white; /* 確保按鈕文字是白色 */
+        }
+        .confirm-btn:hover {
+            background-color: #558C4A;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #343a40;
+        }
+        .selected-dates-info {
+            font-size: 14px;
+            color: #343a40;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="text-center">TIMEPICK</h1>
+    <div class="container">
+        <!-- Timetable Name -->
+        <div class="mb-4">
+            <label for="timetable-name" class="form-label section-title">1. Timetable Name:</label>
+            <input type="text" id="timetable-name" class="form-control" placeholder="Enter name">
+        </div>
+
+        <!-- Available Time -->
+        <div class="mb-4">
+            <span class="section-title">2. Select Available Time:</span>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="available-time" class="form-label">From:</label>
+                    <select id="available-time" class="form-select"></select>
+                </div>
+                <div class="col-md-6">
+                    <label for="end-time" class="form-label">To:</label>
+                    <select id="end-time" class="form-select"></select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Selection -->
+        <div class="mb-4">
+            <span class="section-title">3. Select Dates:</span>
+            <div class="row g-3">
+                <div class="col-md-12 d-flex justify-content-center"> <!-- 將月曆置中 -->
+                    <div> <!-- 包裹月曆和計數器 -->
+                        <div class="calendar-container" id="calendar"></div>
+                        <div class="selected-dates-info text-center" id="selected-dates-info">Selected dates: 0</div> <!-- 計數器也置中 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirm Button -->
+        <div class="text-center"> <!-- 將按鈕置中 -->
+            <button id="confirm-btn" class="btn confirm-btn">Confirm</button>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <!-- Custom JavaScript -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const fromTimeInput = document.getElementById('from-time');
-            const toTimeInput = document.getElementById('to-time');
-            const dateInput = document.getElementById('date');
+        document.addEventListener("DOMContentLoaded", function() {
+            // --- Populate Time Options ---
+            function populateTimeOptions() {
+                const timeOptions = [];
+                for (let i = 0; i < 24; i++) {
+                    let time = i.toString().padStart(2, '0') + ":00";
+                    timeOptions.push(`<option value="${time}">${time}</option>`);
+                }
+                document.getElementById("available-time").innerHTML = timeOptions.join('');
+                document.getElementById("end-time").innerHTML = timeOptions.join('');
+            }
 
-            // 設定今天日期為最小值
+            // --- Calendar Logic ---
+            let currentYear = new Date().getFullYear();
+            let currentMonth = new Date().getMonth(); // 0-11
             const today = new Date();
-            const todayString = today.toISOString().split('T')[0]; // 格式化為 YYYY-MM-DD
-            dateInput.setAttribute('min', todayString);
+            today.setHours(0, 0, 0, 0); // Set time to midnight for accurate date comparison
+            let selectedDates = new Set(); // Store selected dates (YYYY-MM-DD format) globally
 
-            // 允許跨月份選擇
-            dateInput.addEventListener('focus', () => {
-                const maxDate = new Date(today);
-                maxDate.setMonth(today.getMonth() + 1); // 增加一個月
-                const maxDateString = maxDate.toISOString().split('T')[0];
-                dateInput.setAttribute('max', maxDateString);
-            });
+            // Cache DOM elements for performance
+            const calendarElement = document.getElementById("calendar");
+            const selectedDatesInfoElement = document.getElementById("selected-dates-info");
 
-            // 設定 To 時間邏輯
-            fromTimeInput.addEventListener('change', () => {
-                const fromTimeValue = fromTimeInput.value;
-                if (fromTimeValue) {
-                    const [hours, minutes] = fromTimeValue.split(':').map(Number);
-                    const toMinHours = hours + 1; // 至少一小時後
-                    toTimeInput.setAttribute('min', `${toMinHours}:${minutes.toString().padStart(2, '0')}`);
+            // --- Month Navigation Functions ---
+            function prevMonth() {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                renderCalendar();
+            }
+
+            function nextMonth() {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                renderCalendar();
+            }
+
+            // --- Update Selected Dates Count Display ---
+            function updateSelectedDatesCount() {
+                const selectedCount = selectedDates.size;
+                selectedDatesInfoElement.textContent = `Selected dates: ${selectedCount}`;
+            }
+
+            // --- Render Calendar Function ---
+            function renderCalendar() {
+                const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay(); // 0 (Sun) - 6 (Sat)
+                const lastDateOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                const lastDayOfPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+                // --- Calendar Header ---
+                let calendarHTML = `
+                    <div class="calendar-header">
+                        <button id="prev-month-btn">◀</button> 
+                        <span>${new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' })} ${currentYear}</span>
+                        <button id="next-month-btn">▶</button> 
+                    </div>
+                    <table class="calendar-table">
+                        <thead>
+                            <tr>
+                                <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+                let date = 1;
+                let prevMonthDate = lastDayOfPrevMonth - firstDayOfMonth + 1;
+
+                // --- Calendar Body (Weeks and Days) ---
+                for (let i = 0; i < 6; i++) { // Max 6 rows needed for a month
+                    calendarHTML += "<tr>";
+                    for (let j = 0; j < 7; j++) { // 7 days a week
+                        // --- Previous Month's Dates ---
+                        if (i === 0 && j < firstDayOfMonth) {
+                            const prevMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+                            const prevMonthIndex = currentMonth === 0 ? 11 : currentMonth - 1;
+                            // Format date string: YYYY-MM-DD
+                            const dateStr = `${prevMonthYear}-${String(prevMonthIndex + 1).padStart(2, '0')}-${String(prevMonthDate).padStart(2, '0')}`;
+                            
+                            // 檢查這個上個月的日期是否已被選中
+                            const isSelected = selectedDates.has(dateStr);
+                            // 添加 'not-current-month' class，並根據 isSelected 決定是否添加 'selected' class
+                            // 'selected' class 的樣式會因為 !important 而覆蓋 'not-current-month' 的背景和顏色
+                            calendarHTML += `<td class="date-cell not-current-month ${isSelected ? 'selected' : ''}" data-date="${dateStr}">${prevMonthDate}</td>`;
+                            //calendarHTML += `<td class="not-current-month ${isSelected ? 'selected' : ''}" data-date="${dateStr}">${prevMonthDate}</td>`;
+                            //calendarHTML += `<td class="not-current-month" data-date="${dateStr}">${prevMonthDate}</td>`;
+                            prevMonthDate++;
+                        }
+                        // --- Next Month's Dates ---
+                        else if (date > lastDateOfMonth) {
+                            const nextMonthDate = date - lastDateOfMonth;
+                            const nextMonthYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+                            const nextMonthIndex = currentMonth === 11 ? 0 : currentMonth + 1;
+                            const dateObj = new Date(nextMonthYear, nextMonthIndex, nextMonthDate); // 創建 Date 物件用於比較
+                            const isPastDate = dateObj < today; // 檢查是否是過去日期 (雖然不太可能，但以防萬一)
+                            // Format date string: YYYY-MM-DD
+                            const dateStr = `${nextMonthYear}-${String(nextMonthIndex + 1).padStart(2, '0')}-${String(nextMonthDate).padStart(2, '0')}`;
+                            const isSelected = selectedDates.has(dateStr);
+                            // 添加 'date-cell' 以便事件監聽
+                            // 添加 'next-month-preview' 用於樣式區分
+                            // 添加 'disabled' 如果是過去日期
+                            // 添加 'selected' 如果已被選中
+                            calendarHTML += `<td class="date-cell next-month-preview ${isPastDate ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" data-date="${dateStr}">${nextMonthDate}</td>`;
+                            date++;
+                            
+                        }
+                        // --- Current Month's Dates --- (保持不變)
+                        else {
+                            const dateObj = new Date(currentYear, currentMonth, date);
+                            const isPastDate = dateObj < today;
+                            // Format date string: YYYY-MM-DD
+                            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+                            const isSelected = selectedDates.has(dateStr);
+                            // Add 'date-cell' class for event binding, 'disabled' if past, 'selected' if chosen
+                            calendarHTML += `<td class="date-cell ${isPastDate ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" data-date="${dateStr}">${date}</td>`;
+                            date++;
+                        }
+
+                    }
+                    calendarHTML += "</tr>";
+                    // Optimization: Stop generating rows if all remaining dates belong to the next month
+                    if (date > lastDateOfMonth && i >= Math.ceil((firstDayOfMonth + lastDateOfMonth) / 7) - 1) {
+                         break;
+                    }
+                }
+
+                calendarHTML += "</tbody></table>";
+                calendarElement.innerHTML = calendarHTML; // Update the calendar container
+
+                // --- Add Event Listeners AFTER rendering ---
+
+                // 1. Date Cell Click Listener (using event delegation on the table body for efficiency)
+                const tableBody = calendarElement.querySelector("tbody");
+                if (tableBody) {
+                    tableBody.addEventListener("click", function(event) {
+                        const targetCell = event.target;
+                        // Check if the clicked element is a valid, non-disabled date cell
+                        if (targetCell.matches("td.date-cell:not(.disabled)")) {
+                            const dateStr = targetCell.dataset.date;
+                            if (selectedDates.has(dateStr)) {
+                                selectedDates.delete(dateStr);
+                                targetCell.classList.remove("selected");
+                            } else {
+                                selectedDates.add(dateStr);
+                                targetCell.classList.add("selected");
+                            }
+                            updateSelectedDatesCount();
+                        }
+                    });
+                }
+
+
+                // 2. Month Navigation Button Listeners
+                const prevBtn = calendarElement.querySelector("#prev-month-btn");
+                const nextBtn = calendarElement.querySelector("#next-month-btn");
+                if (prevBtn) {
+                    prevBtn.addEventListener("click", prevMonth);
+                }
+                if (nextBtn) {
+                    nextBtn.addEventListener("click", nextMonth);
+                }
+            }
+
+            // --- Initialize ---
+            populateTimeOptions();
+            renderCalendar(); // Initial calendar render
+
+            // --- Confirm Button Action ---
+            document.getElementById("confirm-btn").addEventListener("click", function() {
+                const timetableName = document.getElementById("timetable-name").value.trim(); // Trim whitespace
+                const startTime = document.getElementById("available-time").value;
+                const endTime = document.getElementById("end-time").value;
+                const selectedDatesArray = Array.from(selectedDates); // Convert Set to Array
+
+                // --- Input Validation ---
+                if (!timetableName) {
+                    alert("Please enter a timetable name.");
+                    return;
+                }
+                 if (!startTime || !endTime) {
+                    alert("Please select both start and end times.");
+                    return;
+                }
+                if (selectedDatesArray.length === 0) {
+                    alert("Please select at least one date.");
+                    return;
+                }
+
+                // Validate start time is before end time
+                const startHour = parseInt(startTime.split(':')[0]);
+                const endHour = parseInt(endTime.split(':')[0]);
+                if (startHour >= endHour) {
+                    alert("Start time must be earlier than end time.");
+                    return;
+                }
+
+                // --- Save Data and Redirect ---
+                try {
+                    localStorage.setItem('schedule_data', JSON.stringify({
+                        timetableName,
+                        startTime,
+                        endTime,
+                        selectedDates: selectedDatesArray.sort() // Sort dates before saving
+                    }));
+                    console.log("Data saved to localStorage:", localStorage.getItem('schedule_data')); // Log saved data
+
+                    // Redirect to third.html (assuming it's in the same directory)
+                    window.location.href = 'third.html';
+                    console.log("Attempting redirect to third.html...");
+
+                } catch (error) {
+                    console.error("Error saving data to localStorage or redirecting:", error);
+                    alert("An error occurred while saving your schedule. Please try again.");
                 }
             });
         });
     </script>
-</head>
-<body>
-    <h1>Choose Time</h1>
-    <form>
-        <!-- Timetable Name -->
-        <label for="timetable-name">1. Timetable Name:</label>
-        <input type="text" id="timetable-name" name="timetable-name" required><br><br>
-
-        <!-- Select Available Time -->
-        <label for="from-time">2. Select Available Time:</label><br>
-        From: <input type="time" id="from-time" name="from-time" required><br>
-        To: <input type="time" id="to-time" name="to-time" required><br><br>
-
-        <!-- Select Dates -->
-        <label for="date">3. Select Dates:</label><br>
-        Date: <input type="date" id="date" name="date" required><br><br>
-
-        <!-- Confirm Button -->
-        <button type="submit">Confirm</button>
-    </form>
 </body>
 </html>
