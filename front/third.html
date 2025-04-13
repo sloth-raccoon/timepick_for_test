@@ -29,19 +29,12 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .timezone-info {
-            font-size: 14px;
-            color: #343a40;
-            margin-bottom: 10px;
-            text-align: left;
-        }
-        .timezone-info a {
-            color: #67AD5B;
-            text-decoration: none;
-        }
-        .timezone-info a:hover {
-            text-decoration: underline;
-        }
+        /* --- REMOVED: .timezone-info styles --- */
+        /* .timezone-info { ... } */
+        /* .timezone-info a { ... } */
+        /* .timezone-info a:hover { ... } */
+        /* --- END REMOVED --- */
+
         .time-table {
             /* width: 100%; */
             border-collapse: collapse;
@@ -142,19 +135,12 @@
     <div class="container">
         <div class="header">
             <h1 id="title">Common Available Time!</h1>
-            <!-- --- MODIFIED: Removed language button container --- -->
-            <!-- Top-right Back button - remains unchanged -->
             <button class="btn back-btn" onclick="goBack()" id="back-btn">Back</button>
-            <!-- --- END MODIFIED --- -->
         </div>
 
-        <!-- Timezone Info -->
-        <!-- --- MODIFIED: Removed "Change dates" link --- -->
-        <div class="timezone-info">
-            <span id="timezone-label">Asia/Taipei</span> |
-            <a href="#" id="change-timezone">Change timezone</a>
-        </div>
-        <!-- --- END MODIFIED --- -->
+        <!-- --- REMOVED: Timezone Info Section --- -->
+        <!-- <div class="timezone-info"> ... </div> -->
+        <!-- --- END REMOVED --- -->
 
         <!-- Time Table -->
         <table class="time-table" id="time-table">
@@ -180,17 +166,10 @@
 
     <!-- Custom JavaScript -->
     <script>
-        // --- MODIFIED: Removed isChinese and langData ---
-
         // Load data and display table on page load
         window.onload = function() {
-            // --- MODIFIED: Removed language loading and updateLanguage call ---
             displayCommonTime();
         };
-
-        // --- MODIFIED: Removed updateLanguage function ---
-
-        // --- MODIFIED: Removed switchLanguage function ---
 
         // Go back function
         function goBack() {
@@ -208,17 +187,17 @@
                 selectedDates = []
             } = scheduleData;
 
-            // Update Title - Use timetableName or a fixed default title
-            // --- MODIFIED: Use fixed default title ---
+            // Update Title
             document.getElementById('title').textContent = timetableName || "Common Available Time!";
-            // --- END MODIFIED ---
 
-            // --- MODIFIED: Set fixed text for elements previously updated by updateLanguage ---
+            // Set fixed text for buttons
             document.getElementById('back-btn').textContent = "Back";
             document.getElementById('confirm-btn-bottom').textContent = "Confirm";
-            document.getElementById('timezone-label').textContent = "Asia/Taipei"; // Example, keep as is or make dynamic based on actual timezone logic if added later
-            document.getElementById('change-timezone').textContent = "Change timezone";
-            // --- END MODIFIED ---
+
+            // --- REMOVED: Setting timezone text ---
+            // document.getElementById('timezone-label').textContent = "Asia/Taipei";
+            // document.getElementById('change-timezone').textContent = "Change timezone";
+            // --- END REMOVED ---
 
 
             // 2. Prepare Dates for Header (Sort them)
@@ -324,9 +303,7 @@
             // localStorage.setItem('confirmed_times', JSON.stringify(selectedTimes));
 
             // Provide user feedback
-            // --- MODIFIED: Use fixed alert text ---
             alert("Selected times confirmed and logged to console!");
-            // --- END MODIFIED ---
 
             // Optional: Redirect
             // window.location.href = 'choose.html';
