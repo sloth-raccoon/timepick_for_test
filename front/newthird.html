@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timetable Planner - TIMEPICK</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- REMOVED Google Font Import -->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -22,11 +21,14 @@
             flex: 1;
             padding: 20px;
             margin-left: 0;
-            overflow-y: auto; /* Add scroll for main content if tables get too wide/long */
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
         .header {
             display: flex;
-            justify-content: space-between;
+            /* justify-content: space-between; */ /* Only language switcher left */
+            justify-content: flex-end; /* Align language switcher to the right */
             align-items: center;
             padding: 10px 20px;
             background-color: #ffffff;
@@ -34,42 +36,49 @@
             border-radius: 8px;
             margin-bottom: 20px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
         }
-        .button {
+        .button { /* Style for the Save button */
             background-color: #67AD5B;
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 10px 20px; /* Make save button slightly larger */
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px; /* Make save button font larger */
             border-radius: 5px;
             transition: background-color 0.3s ease;
-            margin: 5px;
+            /* margin: 5px; */ /* Remove default margin */
         }
         .button:hover {
             background-color: #558C4A;
         }
         .container {
             display: flex;
-            gap: 20px;
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            flex-wrap: wrap; /* Allow boxes to wrap */
+            justify-content: center;
+            align-items: flex-start;
+            flex-grow: 1;
+            padding: 20px 0;
         }
         .box {
-            flex: 1;
-            min-width: 350px; /* Adjust min-width as needed */
+            min-width: 350px;
+            max-width: 90%;
+            width: fit-content;
             border: 1px solid #ddd;
-            padding: 15px;
+            padding: 25px;
             border-radius: 8px;
             background-color: #ffffff;
-            overflow-x: auto; /* Allow horizontal scroll within each box if table is wide */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            /* overflow-x: auto; */ /* Let table-wrapper handle overflow */
+        }
+        .table-wrapper {
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+            margin-top: 15px;
         }
         table {
             border-collapse: collapse;
-            margin-top: 15px;
+            width: auto;
         }
         th, td {
             border: 1px solid #ddd;
@@ -79,56 +88,45 @@
             user-select: none;
             font-size: 12px;
             height: 30px;
-            min-width: 50px; /* Adjust min-width for date columns */
-            white-space: nowrap; /* Prevent header text wrapping */
+            min-width: 50px;
+            white-space: nowrap;
         }
         th {
             background-color: #f8f9fa;
             color: #343a40;
             font-weight: bold;
-            position: sticky; /* Make header sticky */
-            top: 0; /* Stick to the top of the scrolling container (.box) */
-            z-index: 1; /* Ensure header is above table content */
+            position: sticky;
+            top: 0;
+            z-index: 1;
         }
         td {
             background-color: #ffffff;
             transition: background-color 0.2s ease;
         }
-        /* --- REMOVED General td:hover rule --- */
-        /* td:hover {
+
+        #your-table td.your-time-none:hover {
              background-color: #e9ecef;
-        } */
-
-        /* --- ADDED Specific hover rule for 'none' state cells --- */
-        #your-table td.your-time-none:hover,
-        #group-table td.group-color-0:hover {
-             background-color: #e9ecef; /* Consistent hover effect */
         }
-        /* --- END ADDED --- */
 
-        /* Style for time column cells (first column) */
         #your-table th:first-child,
-        #your-table td:first-child,
-        #group-table th:first-child,
-        #group-table td:first-child {
+        #your-table td:first-child {
             background-color: #f8f9fa;
             font-weight: bold;
             color: #343a40;
             cursor: default;
-            position: sticky; /* Make time column sticky */
-            left: 0; /* Stick to the left */
-            z-index: 2; /* Ensure time column is above header and content */
-            min-width: 60px; /* Ensure time label width */
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            min-width: 60px;
         }
-         /* Ensure the top-left cell is styled correctly and above others */
-        #your-table th:first-child,
-        #group-table th:first-child {
+        #your-table th:first-child {
             z-index: 3;
         }
 
         .legend {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 5px 15px;
             margin-top: 10px;
             flex-wrap: wrap;
@@ -149,6 +147,7 @@
             font-weight: bold;
             margin-top: 0;
             margin-bottom: 15px;
+            text-align: center;
         }
         .language-switcher select {
              padding: 5px 10px;
@@ -157,23 +156,15 @@
              background-color: #ffffff;
              font-size: 14px;
         }
-        /* Group Availability Colors */
-        .group-color-0 { background-color: #ffffff; border: 1px solid #eee; }
-        .group-color-1 { background-color: #e0f7fa; }
-        .group-color-2 { background-color: #b2ebf2; }
-        .group-color-3 { background-color: #80deea; }
-        .group-color-4 { background-color: #4dd0e1; }
-        .group-color-5 { background-color: #26c6da; }
 
         /* Your Time Colors */
         .your-time-none { background-color: #ffffff; border: 1px solid #eee; }
         .your-time-available { background-color: #a7f3d0; }
 
-        #group-status {
-            font-weight: bold;
-            color: #343a40;
-            margin-top: 10px;
-            display: block;
+        /* --- Style for Save button container --- */
+        .button-container {
+            text-align: center; /* Center the button */
+            margin-top: 25px; /* Add space above the button */
         }
 
     </style>
@@ -182,11 +173,7 @@
     <div class="layout">
         <div class="main" id="main">
             <div class="header">
-                <div>
-                    <button class="button" onclick="location.reload()">New</button>
-                    <button class="button" onclick="saveSchedule()">Save</button>
-                    <button class="button" onclick="resetAll()">Reset Tables</button>
-                </div>
+                <!-- Removed New and Reset buttons -->
                 <div class="language-switcher">
                     <select id="language-select">
                         <option value="en">English</option>
@@ -201,60 +188,37 @@
                         <div class="color-box your-time-none" style="border: 1px solid #ccc;"></div> None
                         <div class="color-box your-time-available"></div> Available
                     </div>
-                    <table id="your-table">
-                        <thead>
-                             <!-- Header row will be populated by JS -->
-                             <tr><th>Time</th></tr>
-                        </thead>
-                        <tbody><!-- Populated by JS --></tbody>
-                    </table>
-                </div>
-                <div class="box">
-                    <h3>Group Availability</h3>
-                    <div class="legend">
-                        <div class="color-box group-color-1"></div> 1/5
-                        <div class="color-box group-color-2"></div> 2/5
-                        <div class="color-box group-color-3"></div> 3/5
-                        <div class="color-box group-color-4"></div> 4/5
-                        <div class="color-box group-color-5"></div> 5/5
+                    <div class="table-wrapper">
+                        <table id="your-table">
+                            <thead>
+                                <tr><th>Time</th></tr>
+                            </thead>
+                            <tbody><!-- Populated by JS --></tbody>
+                        </table>
                     </div>
-                    <span id="group-status">0/0 Fully Available</span>
-                    <table id="group-table">
-                        <thead>
-                             <!-- Header row will be populated by JS -->
-                             <tr><th>Time</th></tr>
-                        </thead>
-                        <tbody><!-- Populated by JS --></tbody>
-                    </table>
+                    <!-- Moved Save button here -->
+                    <div class="button-container">
+                        <button class="button" onclick="saveSchedule()">Save</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- JAVASCRIPT REMAINS UNCHANGED ---
         let isDragging = false;
         let currentDragState = null;
-        const groupMax = 5;
 
         // --- DOM Elements ---
         const yourTable = document.getElementById('your-table');
-        const groupTable = document.getElementById('group-table');
         const yourTableHeadRow = yourTable.querySelector('thead tr');
-        const groupTableHeadRow = groupTable.querySelector('thead tr');
         const yourTableBody = yourTable.querySelector('tbody');
-        const groupTableBody = groupTable.querySelector('tbody');
-        const groupStatusSpan = document.getElementById('group-status');
 
         // --- Constants for Styles ---
         const YOUR_TIME_CLASSES = {
             none: 'your-time-none',
             available: 'your-time-available'
         };
-        const GROUP_COLOR_CLASSES = [
-            'group-color-0', 'group-color-1', 'group-color-2',
-            'group-color-3', 'group-color-4', 'group-color-5'
-        ];
 
         // --- Functions ---
 
@@ -271,16 +235,12 @@
         }
 
         function populateTables() {
-            // Clear existing table content
-            yourTableHeadRow.innerHTML = '<th>Time</th>'; // Keep the first header cell
-            groupTableHeadRow.innerHTML = '<th>Time</th>';
+            yourTableHeadRow.innerHTML = '<th>Time</th>';
             yourTableBody.innerHTML = '';
-            groupTableBody.innerHTML = '';
 
-            // --- Retrieve data from localStorage ---
-            let start = 9; // Default start
-            let end = 18; // Default end
-            let selectedDates = []; // Default empty array
+            let start = 9;
+            let end = 18;
+            let selectedDates = [];
             const savedData = localStorage.getItem('schedule_data');
 
             if (savedData) {
@@ -299,28 +259,25 @@
                         console.warn("Invalid selectedDates from localStorage, using empty array.");
                         selectedDates = [];
                     }
-
                 } catch (e) {
                     console.error("Error parsing schedule data from localStorage:", e);
-                    selectedDates = []; // Reset on error
+                    selectedDates = [];
                 }
             } else {
                  console.log("No schedule data found in localStorage, using default times (9-18) and no dates.");
             }
 
-            // --- Process and Sort Dates ---
             const sortedDates = selectedDates
-                .map(dateStr => new Date(dateStr + 'T00:00:00')) // Ensure parsing as local date
-                .filter(date => !isNaN(date.getTime())) // Filter out invalid dates
+                .map(dateStr => new Date(dateStr + 'T00:00:00'))
+                .filter(date => !isNaN(date.getTime()))
                 .sort((a, b) => a - b);
 
-            // --- Generate Table Headers (Dates) ---
-            const dateHeaders = []; // Store header info for body generation
+            const dateHeaders = [];
             sortedDates.forEach(date => {
                 const month = date.getMonth() + 1;
                 const day = date.getDate();
-                const formattedDate = `${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}`; // MM/DD
-                const dateString = `${date.getFullYear()}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`; // YYYY-MM-DD
+                const formattedDate = `${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}`;
+                const dateString = `${date.getFullYear()}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
                 dateHeaders.push({ formatted: formattedDate, full: dateString });
 
@@ -328,64 +285,36 @@
                 thYour.textContent = formattedDate;
                 thYour.dataset.date = dateString;
                 yourTableHeadRow.appendChild(thYour);
-
-                const thGroup = document.createElement('th');
-                thGroup.textContent = formattedDate;
-                thGroup.dataset.date = dateString;
-                groupTableHeadRow.appendChild(thGroup);
             });
 
-            // --- Generate Table Body (Time Slots) ---
             const times = createRows(start, end);
 
             if (times.length === 0 || sortedDates.length === 0) {
-                const colSpan = Math.max(sortedDates.length + 1, 1); // Span across date columns + time column
+                const colSpan = Math.max(sortedDates.length + 1, 1);
                 const message = times.length === 0 ? "Error: Invalid time range." : "No dates selected.";
                 console.error(message);
                 yourTableBody.innerHTML = `<tr><td colspan="${colSpan}">${message}</td></tr>`;
-                groupTableBody.innerHTML = `<tr><td colspan="${colSpan}">${message}</td></tr>`;
-                updateGroupStatus(); // Update status even if empty
                 return;
             }
 
             times.forEach((time) => {
                 const rowYour = document.createElement('tr');
-                const rowGroup = document.createElement('tr');
-
-                // Time cell
                 const timeCellYour = document.createElement('td');
                 timeCellYour.textContent = time;
-                const timeCellGroup = timeCellYour.cloneNode(true);
                 rowYour.appendChild(timeCellYour);
-                rowGroup.appendChild(timeCellGroup);
 
-                // Data cells for each date
                 dateHeaders.forEach(headerInfo => {
                     const dateString = headerInfo.full;
-
-                    // Your Time Cell
                     const tdYour = document.createElement('td');
                     tdYour.classList.add(YOUR_TIME_CLASSES.none);
                     tdYour.dataset.time = time;
-                    tdYour.dataset.date = dateString; // Use YYYY-MM-DD
+                    tdYour.dataset.date = dateString;
                     rowYour.appendChild(tdYour);
-
-                    // Group Time Cell
-                    const tdGroup = document.createElement('td');
-                    tdGroup.classList.add(GROUP_COLOR_CLASSES[0]);
-                    tdGroup.dataset.count = "0";
-                    tdGroup.dataset.time = time;
-                    tdGroup.dataset.date = dateString; // Use YYYY-MM-DD
-                    rowGroup.appendChild(tdGroup);
                 });
-
                 yourTableBody.appendChild(rowYour);
-                groupTableBody.appendChild(rowGroup);
             });
 
             setupTableInteraction('#your-table', handleYourCellInteraction);
-            setupTableInteraction('#group-table', handleGroupCellInteraction);
-            updateGroupStatus();
         }
 
 
@@ -395,9 +324,7 @@
             const tbody = table.querySelector('tbody');
             if (!tbody) return;
 
-            // --- Mouse Events ---
             tbody.addEventListener('mousedown', (e) => {
-                // Check if target is a TD and NOT the first cell (time label)
                 if (e.target.tagName === 'TD' && e.target.cellIndex > 0) {
                     isDragging = true;
                     currentDragState = cellHandler(e.target, 'mousedown');
@@ -422,18 +349,16 @@
                 }
             });
 
-            // --- Touch Events ---
             tbody.addEventListener('touchstart', (e) => {
                 if (e.target.tagName === 'TD' && e.target.cellIndex > 0) {
                     isDragging = true;
                     currentDragState = cellHandler(e.target, 'mousedown');
-                    // Don't prevent default immediately for touchstart to allow scrolling
                 }
             }, { passive: true });
 
             tbody.addEventListener('touchmove', (e) => {
                 if (isDragging) {
-                    e.preventDefault(); // Prevent scroll ONLY when dragging cells
+                    e.preventDefault();
                     const touch = e.touches[0];
                     const element = document.elementFromPoint(touch.clientX, touch.clientY);
                     if (element && element.tagName === 'TD' && element.closest(tableSelector) && element.cellIndex > 0) {
@@ -452,7 +377,6 @@
             document.addEventListener('touchcancel', endTouch);
         }
 
-        // Updated: Handle only 'none' and 'available' states
         function handleYourCellInteraction(cell, eventType, dragState) {
             const states = [YOUR_TIME_CLASSES.none, YOUR_TIME_CLASSES.available];
             let currentStateIndex = states.findIndex(cls => cell.classList.contains(cls));
@@ -476,72 +400,13 @@
              return states[currentStateIndex];
         }
 
-
-        function handleGroupCellInteraction(cell, eventType, dragState) {
-             let currentCount = parseInt(cell.dataset.count) || 0;
-             let nextCount;
-
-             if (eventType === 'mousedown') {
-                 nextCount = (currentCount + 1) % (groupMax + 1);
-                 cell.dataset.count = nextCount;
-                 cell.classList.remove(...GROUP_COLOR_CLASSES);
-                 cell.classList.add(GROUP_COLOR_CLASSES[nextCount]);
-                 updateGroupStatus();
-                 return nextCount;
-             } else if (eventType === 'mouseover' && dragState !== null) {
-                 const dragCount = parseInt(dragState);
-                 if (currentCount !== dragCount) {
-                     cell.dataset.count = dragCount;
-                     cell.classList.remove(...GROUP_COLOR_CLASSES);
-                     cell.classList.add(GROUP_COLOR_CLASSES[dragCount]);
-                     updateGroupStatus();
-                 }
-                 return dragCount;
-             }
-             return currentCount;
-        }
-
-
-        function updateGroupStatus() {
-            let fullyAvailableCount = 0;
-            // Check if groupTableBody has child nodes before querying
-            if (!groupTableBody || !groupTableBody.hasChildNodes()) {
-                 groupStatusSpan.textContent = `0/0 Fully Available`;
-                 return;
-            }
-            // Query only data cells (skip time header cell if it were part of query)
-            const groupCells = groupTableBody.querySelectorAll('td[data-count]');
-            const totalCells = groupCells.length;
-
-            groupCells.forEach(cell => {
-                if (parseInt(cell.dataset.count) === groupMax) {
-                    fullyAvailableCount++;
-                }
-            });
-            groupStatusSpan.textContent = `${fullyAvailableCount}/${totalCells || 0} Fully Available`;
-        }
-
-
-        function resetAll() {
-             // Select only data cells (index > 0) in your table body
-             yourTableBody.querySelectorAll('td:not(:first-child)').forEach(cell => {
-                 cell.classList.remove(...Object.values(YOUR_TIME_CLASSES));
-                 cell.classList.add(YOUR_TIME_CLASSES.none);
-             });
-             // Select only data cells (index > 0) in group table body
-             groupTableBody.querySelectorAll('td:not(:first-child)').forEach(cell => {
-                 cell.dataset.count = 0;
-                 cell.classList.remove(...GROUP_COLOR_CLASSES);
-                 cell.classList.add(GROUP_COLOR_CLASSES[0]);
-             });
-             updateGroupStatus();
-             console.log("Tables reset.");
-        }
+        // Removed resetAll function as the button is gone
+        // function resetAll() { ... }
 
         function saveSchedule() {
             let timetableName = "Untitled Schedule";
             let startTime = "09:00";
-            let endTime = "17:00"; // Represents the *start* of the last slot
+            let endTime = "17:00";
             let savedDates = [];
             const savedData = localStorage.getItem('schedule_data');
              if (savedData) {
@@ -550,30 +415,24 @@
                     timetableName = scheduleData.timetableName || timetableName;
                     startTime = scheduleData.startTime || startTime;
                     savedDates = scheduleData.selectedDates || [];
-                    // Calculate end time label correctly (if end hour is 18, last label is 17:00)
                     const endHour = parseInt(scheduleData.endTime?.split(':')[0]);
                     if (!isNaN(endHour) && endHour > 0) {
-                        // The endTime in the saved data represents the hour *after* the last slot.
-                        // The last time label should be one hour before that.
                         endTime = (endHour - 1).toString().padStart(2, '0') + ':00';
                     } else {
-                         endTime = scheduleData.endTime || endTime; // Fallback or keep default
+                         endTime = scheduleData.endTime || endTime;
                     }
                 } catch (e) {
                     console.error("Error parsing schedule data for saving:", e);
                 }
             }
 
-            const participants = []; // Still no participant list UI
+            const participants = [];
 
-            // Get date headers (YYYY-MM-DD) from the table header
             const dateHeaderElements = yourTableHeadRow.querySelectorAll('th[data-date]');
             const dateColumns = Array.from(dateHeaderElements).map(th => th.dataset.date);
 
-            // Function to extract data, now aware of dynamic columns
             const getTableData = (tableBody, dataExtractor) => {
                 return Array.from(tableBody.querySelectorAll('tr')).map(row => {
-                    // Select all data cells (skip the first time label cell)
                     const cells = row.querySelectorAll('td:not(:first-child)');
                     return Array.from(cells).map(dataExtractor);
                 });
@@ -584,19 +443,16 @@
                  return 'none';
             });
 
-            const groupData = getTableData(groupTableBody, cell => parseInt(cell.dataset.count) || 0);
-
             const timeLabels = Array.from(yourTableBody.querySelectorAll('tr')).map(row => row.cells[0]?.textContent || '');
 
             const result = {
                 name: timetableName,
                 participants: participants,
                 timeLabels: timeLabels.filter(label => label),
-                dateColumns: dateColumns, // Add the date columns used
-                yourAvailability: yourData, // 2D array [time][date]
-                groupAvailability: groupData, // 2D array [time][date]
-                startTime: startTime, // Actual start time from settings/default
-                endTime: endTime     // Actual end time label from settings/default
+                dateColumns: dateColumns,
+                yourAvailability: yourData,
+                startTime: startTime,
+                endTime: endTime
             };
 
             console.log("Saved Data:", JSON.stringify(result, null, 2));
@@ -608,7 +464,7 @@
 
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
-            populateTables(); // Populate based on localStorage or defaults
+            populateTables();
         });
 
     </script>
