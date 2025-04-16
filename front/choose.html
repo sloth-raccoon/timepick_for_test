@@ -101,7 +101,7 @@
             background-color: #f8f9fa; /* 淺灰色背景 */
             color: #ccc; /* 淺灰色文字 */
             /*cursor: not-allowed; /* 不允許的鼠標樣式 */
-            /*pointer-events: none; /* 阻止點擊事件 */ 
+            /*pointer-events: none; /* 阻止點擊事件 */
         }
         .calendar-table td.not-current-month:hover:not(.disabled) {
             background-color: #e9ecef; /* 與其他日期使用相同的 hover 背景色 */
@@ -244,9 +244,9 @@
                 // --- Calendar Header ---
                 let calendarHTML = `
                     <div class="calendar-header">
-                        <button id="prev-month-btn">◀</button> 
+                        <button id="prev-month-btn">◀</button>
                         <span>${new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' })} ${currentYear}</span>
-                        <button id="next-month-btn">▶</button> 
+                        <button id="next-month-btn">▶</button>
                     </div>
                     <table class="calendar-table">
                         <thead>
@@ -267,16 +267,9 @@
                         if (i === 0 && j < firstDayOfMonth) {
                             const prevMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
                             const prevMonthIndex = currentMonth === 0 ? 11 : currentMonth - 1;
-                            // Format date string: YYYY-MM-DD
                             const dateStr = `${prevMonthYear}-${String(prevMonthIndex + 1).padStart(2, '0')}-${String(prevMonthDate).padStart(2, '0')}`;
-                            
-                            // 檢查這個上個月的日期是否已被選中
                             const isSelected = selectedDates.has(dateStr);
-                            // 添加 'not-current-month' class，並根據 isSelected 決定是否添加 'selected' class
-                            // 'selected' class 的樣式會因為 !important 而覆蓋 'not-current-month' 的背景和顏色
                             calendarHTML += `<td class="date-cell not-current-month ${isSelected ? 'selected' : ''}" data-date="${dateStr}">${prevMonthDate}</td>`;
-                            //calendarHTML += `<td class="not-current-month ${isSelected ? 'selected' : ''}" data-date="${dateStr}">${prevMonthDate}</td>`;
-                            //calendarHTML += `<td class="not-current-month" data-date="${dateStr}">${prevMonthDate}</td>`;
                             prevMonthDate++;
                         }
                         // --- Next Month's Dates ---
@@ -284,50 +277,39 @@
                             const nextMonthDate = date - lastDateOfMonth;
                             const nextMonthYear = currentMonth === 11 ? currentYear + 1 : currentYear;
                             const nextMonthIndex = currentMonth === 11 ? 0 : currentMonth + 1;
-                            const dateObj = new Date(nextMonthYear, nextMonthIndex, nextMonthDate); // 創建 Date 物件用於比較
-                            const isPastDate = dateObj < today; // 檢查是否是過去日期 (雖然不太可能，但以防萬一)
-                            // Format date string: YYYY-MM-DD
+                            const dateObj = new Date(nextMonthYear, nextMonthIndex, nextMonthDate);
+                            const isPastDate = dateObj < today;
                             const dateStr = `${nextMonthYear}-${String(nextMonthIndex + 1).padStart(2, '0')}-${String(nextMonthDate).padStart(2, '0')}`;
                             const isSelected = selectedDates.has(dateStr);
-                            // 添加 'date-cell' 以便事件監聽
-                            // 添加 'next-month-preview' 用於樣式區分
-                            // 添加 'disabled' 如果是過去日期
-                            // 添加 'selected' 如果已被選中
                             calendarHTML += `<td class="date-cell next-month-preview ${isPastDate ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" data-date="${dateStr}">${nextMonthDate}</td>`;
                             date++;
-                            
+
                         }
-                        // --- Current Month's Dates --- (保持不變)
+                        // --- Current Month's Dates ---
                         else {
                             const dateObj = new Date(currentYear, currentMonth, date);
                             const isPastDate = dateObj < today;
-                            // Format date string: YYYY-MM-DD
                             const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
                             const isSelected = selectedDates.has(dateStr);
-                            // Add 'date-cell' class for event binding, 'disabled' if past, 'selected' if chosen
                             calendarHTML += `<td class="date-cell ${isPastDate ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" data-date="${dateStr}">${date}</td>`;
                             date++;
                         }
 
                     }
                     calendarHTML += "</tr>";
-                    // Optimization: Stop generating rows if all remaining dates belong to the next month
                     if (date > lastDateOfMonth && i >= Math.ceil((firstDayOfMonth + lastDateOfMonth) / 7) - 1) {
                          break;
                     }
                 }
 
                 calendarHTML += "</tbody></table>";
-                calendarElement.innerHTML = calendarHTML; // Update the calendar container
+                calendarElement.innerHTML = calendarHTML;
 
                 // --- Add Event Listeners AFTER rendering ---
-
-                // 1. Date Cell Click Listener (using event delegation on the table body for efficiency)
                 const tableBody = calendarElement.querySelector("tbody");
                 if (tableBody) {
                     tableBody.addEventListener("click", function(event) {
                         const targetCell = event.target;
-                        // Check if the clicked element is a valid, non-disabled date cell
                         if (targetCell.matches("td.date-cell:not(.disabled)")) {
                             const dateStr = targetCell.dataset.date;
                             if (selectedDates.has(dateStr)) {
@@ -342,8 +324,6 @@
                     });
                 }
 
-
-                // 2. Month Navigation Button Listeners
                 const prevBtn = calendarElement.querySelector("#prev-month-btn");
                 const nextBtn = calendarElement.querySelector("#next-month-btn");
                 if (prevBtn) {
@@ -360,10 +340,10 @@
 
             // --- Confirm Button Action ---
             document.getElementById("confirm-btn").addEventListener("click", function() {
-                const timetableName = document.getElementById("timetable-name").value.trim(); // Trim whitespace
+                const timetableName = document.getElementById("timetable-name").value.trim();
                 const startTime = document.getElementById("available-time").value;
                 const endTime = document.getElementById("end-time").value;
-                const selectedDatesArray = Array.from(selectedDates); // Convert Set to Array
+                const selectedDatesArray = Array.from(selectedDates);
 
                 // --- Input Validation ---
                 if (!timetableName) {
@@ -379,7 +359,6 @@
                     return;
                 }
 
-                // Validate start time is before end time
                 const startHour = parseInt(startTime.split(':')[0]);
                 const endHour = parseInt(endTime.split(':')[0]);
                 if (startHour >= endHour) {
@@ -393,13 +372,13 @@
                         timetableName,
                         startTime,
                         endTime,
-                        selectedDates: selectedDatesArray.sort() // Sort dates before saving
+                        selectedDates: selectedDatesArray.sort()
                     }));
-                    console.log("Data saved to localStorage:", localStorage.getItem('schedule_data')); // Log saved data
+                    console.log("Data saved to localStorage:", localStorage.getItem('schedule_data'));
 
-                    // Redirect to third.html (assuming it's in the same directory)
-                    window.location.href = 'third.html';
-                    console.log("Attempting redirect to third.html...");
+                    // *** MODIFIED LINE: Redirect to newthird.html ***
+                    window.location.href = 'newthird.html';
+                    console.log("Attempting redirect to newthird.html...");
 
                 } catch (error) {
                     console.error("Error saving data to localStorage or redirecting:", error);
