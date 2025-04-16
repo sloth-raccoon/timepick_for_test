@@ -27,27 +27,25 @@
         }
         .header {
             display: flex;
-            /* justify-content: space-between; */ /* Only language switcher left */
             justify-content: flex-end; /* Align language switcher to the right */
             align-items: center;
             padding: 10px 20px;
-            background-color: #ffffff;
+            /* background-color: #ffffff; */ /* REMOVED white background */
             color: #343a40;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            /* border-radius: 8px; */ /* REMOVED border-radius */
+            margin-bottom: 20px; /* Keep margin for spacing */
+            /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); */ /* REMOVED shadow */
             flex-shrink: 0;
         }
         .button { /* Style for the Save button */
             background-color: #67AD5B;
             color: white;
             border: none;
-            padding: 10px 20px; /* Make save button slightly larger */
+            padding: 10px 20px;
             cursor: pointer;
-            font-size: 16px; /* Make save button font larger */
+            font-size: 16px;
             border-radius: 5px;
             transition: background-color 0.3s ease;
-            /* margin: 5px; */ /* Remove default margin */
         }
         .button:hover {
             background-color: #558C4A;
@@ -68,7 +66,6 @@
             border-radius: 8px;
             background-color: #ffffff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            /* overflow-x: auto; */ /* Let table-wrapper handle overflow */
         }
         .table-wrapper {
             display: flex;
@@ -153,7 +150,7 @@
              padding: 5px 10px;
              border-radius: 8px;
              border: 1px solid #cbd5e1;
-             background-color: #ffffff;
+             background-color: #ffffff; /* Keep background for select itself */
              font-size: 14px;
         }
 
@@ -161,10 +158,9 @@
         .your-time-none { background-color: #ffffff; border: 1px solid #eee; }
         .your-time-available { background-color: #a7f3d0; }
 
-        /* --- Style for Save button container --- */
         .button-container {
-            text-align: center; /* Center the button */
-            margin-top: 25px; /* Add space above the button */
+            text-align: center;
+            margin-top: 25px;
         }
 
     </style>
@@ -173,7 +169,6 @@
     <div class="layout">
         <div class="main" id="main">
             <div class="header">
-                <!-- Removed New and Reset buttons -->
                 <div class="language-switcher">
                     <select id="language-select">
                         <option value="en">English</option>
@@ -196,7 +191,6 @@
                             <tbody><!-- Populated by JS --></tbody>
                         </table>
                     </div>
-                    <!-- Moved Save button here -->
                     <div class="button-container">
                         <button class="button" onclick="saveSchedule()">Save</button>
                     </div>
@@ -206,21 +200,18 @@
     </div>
 
     <script>
+        // --- JAVASCRIPT REMAINS UNCHANGED ---
         let isDragging = false;
         let currentDragState = null;
 
-        // --- DOM Elements ---
         const yourTable = document.getElementById('your-table');
         const yourTableHeadRow = yourTable.querySelector('thead tr');
         const yourTableBody = yourTable.querySelector('tbody');
 
-        // --- Constants for Styles ---
         const YOUR_TIME_CLASSES = {
             none: 'your-time-none',
             available: 'your-time-available'
         };
-
-        // --- Functions ---
 
         function createRows(start, end) {
             const times = [];
@@ -399,9 +390,6 @@
             }
              return states[currentStateIndex];
         }
-
-        // Removed resetAll function as the button is gone
-        // function resetAll() { ... }
 
         function saveSchedule() {
             let timetableName = "Untitled Schedule";
