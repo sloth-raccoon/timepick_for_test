@@ -17,3 +17,4 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TIMEPICK_FOR_TEST }}
           channelId: live
           projectId: timepick-for-test
+          entryPoint: front
