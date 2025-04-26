@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
   <title>登入 - TimePick</title>
@@ -38,8 +38,9 @@
 <!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithRedirect } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+  import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
+  // Firebase 設定
   const firebaseConfig = {
     apiKey: "AIzaSyCq7lE6EK9hmCd8SDSTbvAZxrozVGXQZpo",
     authDomain: "timepick-for-test.firebaseapp.com",
@@ -49,15 +50,27 @@
     appId: "1:14150496366:web:45cbdc5752a3dc1e43f67f"
   };
 
+  // 初始化 Firebase
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
-  const loginBtn = document.getElementById('login-btn');
-  loginBtn.addEventListener('click', () => {
+  // 按下登入按鈕，啟動 Google 登入流程
+  document.getElementById('login-btn').addEventListener('click', () => {
     const provider = new GoogleAuthProvider();
     signInWithRedirect(auth, provider);
   });
 
+  // 登入成功後，自動跳轉 choose.html
+  getRedirectResult(auth)
+    .then((result) => {
+      if (result) {
+        // 登入成功，跳轉 choose.html
+        window.location.href = "choose.html";
+      }
+    })
+    .catch((error) => {
+      console.error('登入錯誤', error);
+    });
 </script>
 
 </body>
