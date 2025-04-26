@@ -1,218 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log in - TIMEPICK</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Log in - TIMEPICK</title>
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Firebase SDK v9 -->
+  <script type="module" src="./app.js" defer></script>
 
-    <!-- Custom CSS -->
-    <style>
-        body {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f8f9fa;
-            font-family: Arial, sans-serif;
-            position: relative;
-        }
-        .title {
-            position: absolute;
-            top: 30px;
-            font-size: 48px;
-            font-weight: bold;
-            color: #67AD5B;
-        }
-        .language-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 16px;
-            color: #67AD5B;
-        }
-        .login-container {
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .how-it-works {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            font-size: 16px;
-            color: #67AD5B;
-        }
-        .create-btn {
-            background-color: #67AD5B;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-        }
-        .create-btn:hover {
-            background-color: #558C4A;
-        }
-        .btn-outline-theme {
-            border-color: #67AD5B;
-            color: #67AD5B;
-        }
-        .btn-outline-theme:hover {
-            background-color: #67AD5B;
-            color: white;
-        }
-    </style>
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f8f9fa;
+      font-family: Arial, sans-serif;
+      position: relative;
+    }
+    .title {
+      position: absolute;
+      top: 30px;
+      font-size: 48px;
+      font-weight: bold;
+      color: #67AD5B;
+    }
+    .language-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 16px;
+      color: #67AD5B;
+    }
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .how-it-works {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      font-size: 16px;
+      color: #67AD5B;
+    }
+    .create-btn {
+      background-color: #67AD5B;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+    .create-btn:hover {
+      background-color: #558C4A;
+    }
+    .btn-outline-theme {
+      border-color: #67AD5B;
+      color: #67AD5B;
+    }
+    .btn-outline-theme:hover {
+      background-color: #67AD5B;
+      color: white;
+    }
+  </style>
 </head>
+
 <body>
 
-    <!-- Title -->
-    <h1 class="title">TIMEPICK</h1>
+  <!-- 登入按鈕 -->
+  <button id="google-login-btn" class="btn btn-outline-theme">使用 Google 登入</button>
 
-    <!-- Language Switch Button -->
-    <button class="btn language-btn" onclick="switchLanguage()">
-        <span id="lang-text">Switch Language</span>
-    </button>
+  <!-- 顯示用戶資訊 -->
+  <div id="user-info" class="mt-4"></div>
 
-    <!-- Login Form Container -->
-    <div class="login-container">
+  <h1 class="title">TIMEPICK</h1>
 
-        <!-- Google Login Button -->
-        <button class="btn create-btn w-100 mb-3" onclick="googleLogin()">使用 Google 登入</button>
+  <button class="btn language-btn" onclick="switchLanguage()">
+    <span id="lang-text">Switch Language</span>
+  </button>
 
-        <!-- User Info Display -->
-        <div id="user-info"></div>
-
-        <!-- Name Section -->
-        <div class="mb-4">
-            <h2 class="fs-5" id="name-label">Enter Your Name</h2>
-            <div class="input-group mb-3">
-                <input type="text" id="name" class="form-control" placeholder="Your Name" required>
-                <button class="btn btn-outline-theme" onclick="confirmName()">Confirm</button>
-            </div>
-            <div id="name-feedback" class="invalid-feedback"></div>
-        </div>
-
-        <!-- Password Section -->
-        <div class="mb-4">
-            <h2 class="fs-5" id="password-label">Enter Password</h2>
-            <div class="input-group mb-3">
-                <input type="password" id="password" class="form-control" placeholder="Your Password" required>
-                <button class="btn btn-outline-theme" onclick="confirmPassword()">Confirm</button>
-            </div>
-            <div id="password-feedback" class="invalid-feedback"></div>
-        </div>
-
-        <!-- Create Schedule Button -->
-        <button class="btn create-btn w-100" onclick="createSchedule()" id="create-btn">Create Your First Schedule</button>
-
+  <div class="login-container">
+    <!-- Name Section -->
+    <div class="mb-4">
+      <h2 class="fs-5" id="name-label">Enter Your Name</h2>
+      <div class="input-group mb-3">
+        <input type="text" id="name" class="form-control" placeholder="Your Name" required>
+        <button class="btn btn-outline-theme" onclick="confirmName()">Confirm</button>
+      </div>
+      <div id="name-feedback" class="invalid-feedback"></div>
     </div>
 
-    <!-- How It Works Button -->
-    <button class="btn how-it-works" onclick="howItWorks()">How It Works</button>
+    <!-- Password Section -->
+    <div class="mb-4">
+      <h2 class="fs-5" id="password-label">Enter Password</h2>
+      <div class="input-group mb-3">
+        <input type="password" id="password" class="form-control" placeholder="Your Password" required>
+        <button class="btn btn-outline-theme" onclick="confirmPassword()">Confirm</button>
+      </div>
+      <div id="password-feedback" class="invalid-feedback"></div>
+    </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <button class="btn create-btn w-100" onclick="createSchedule()" id="create-btn">Create Your First Schedule</button>
+  </div>
 
-    <!-- Custom JavaScript -->
-    <script type="module" src="app.js"></script>
+  <button class="btn how-it-works" onclick="howItWorks()">How It Works</button>
 
-    <script>
-        let username = '';
-        let password = '';
-        let isChinese = false;
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-        const langData = {
-            en: {
-                langText: "Switch Language",
-                nameLabel: "Enter Your Name",
-                passwordLabel: "Enter Password",
-                createBtn: "Create Your First Schedule",
-                howItWorks: "How It Works",
-                nameError: "Please enter your name.",
-                passwordError: "Please enter a password.",
-                bothError: "Please enter both name and password!",
-                greeting: "Hello, ",
-                howItWorksText: "How It Works: Enter your name and password, then create a schedule!"
-            },
-            zh: {
-                langText: "切換語言",
-                nameLabel: "輸入您的姓名",
-                passwordLabel: "輸入密碼",
-                createBtn: "創建您的第一個日程",
-                howItWorks: "如何使用",
-                nameError: "請輸入您的姓名。",
-                passwordError: "請輸入密碼。",
-                bothError: "請同時輸入姓名和密碼！",
-                greeting: "你好，",
-                howItWorksText: "如何使用：輸入您的姓名和密碼，然後創建日程！"
-            }
-        };
-
-        window.onload = function() {
-            const savedUser = localStorage.getItem('timepick_user');
-            if (savedUser) {
-                const userData = JSON.parse(savedUser);
-                document.getElementById('name').value = userData.username;
-                document.getElementById('password').value = userData.password;
-                username = userData.username;
-                password = userData.password;
-            }
-        };
-
-        function confirmName() {
-            username = document.getElementById('name').value.trim();
-            const feedback = document.getElementById('name-feedback');
-            if (username) {
-                document.getElementById('name').classList.remove('is-invalid');
-                feedback.textContent = '';
-                alert((isChinese ? langData.zh.greeting : langData.en.greeting) + username + '!');
-            } else {
-                document.getElementById('name').classList.add('is-invalid');
-                feedback.textContent = isChinese ? langData.zh.nameError : langData.en.nameError;
-            }
-        }
-
-        function confirmPassword() {
-            password = document.getElementById('password').value.trim();
-            const feedback = document.getElementById('password-feedback');
-            if (password) {
-                document.getElementById('password').classList.remove('is-invalid');
-                feedback.textContent = '';
-            } else {
-                document.getElementById('password').classList.add('is-invalid');
-                feedback.textContent = isChinese ? langData.zh.passwordError : langData.en.passwordError;
-            }
-        }
-
-        function createSchedule() {
-            confirmName();
-            confirmPassword();
-            if (username && password) {
-                localStorage.setItem('timepick_user', JSON.stringify({ username, password }));
-                window.location.href = 'choose.html';
-            } else {
-                alert(isChinese ? langData.zh.bothError : langData.en.bothError);
-            }
-        }
-
-        function switchLanguage() {
-            isChinese = !isChinese;
-            const lang = isChinese ? langData.zh : langData.en;
-            document.getElementById('lang-text').textContent = lang.langText;
-            document.getElementById('name-label').textContent = lang.nameLabel;
-            document.getElementById('password-label').textContent = lang.passwordLabel;
-            document.getElementById('create-btn').textContent = lang.createBtn;
-            document.querySelector('.how-it-works').textContent = lang.howItWorks;
-        }
-
-        function howItWorks() {
-            alert(isChinese ? langData.zh.howItWorksText : langData.en.howItWorksText);
-        }
-    </script>
 </body>
 </html>
