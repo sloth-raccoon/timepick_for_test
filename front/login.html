@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - TimePick</title>
+  <script type="module">
+    // 引入 Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithRedirect } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCq7lE6EK9hmCd8SDSTbvAZxrozVGXQZpo",
+      authDomain: "timepick-for-test.firebaseapp.com",
+      projectId: "timepick-for-test",
+      storageBucket: "timepick-for-test.appspot.com",
+      messagingSenderId: "14150496366",
+      appId: "1:14150496366:web:45cbdc5752a3dc1e43f67f"
+    };
+
+    // 初始化
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // 一進來就啟動登入
+    signInWithRedirect(auth, provider);
+  </script>
+</head>
+<body>
+  <h1>Redirecting to Google Sign-In...</h1>
+</body>
+</html>
