@@ -1,4 +1,4 @@
-// 導入 Firebase 模組
+// app.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
@@ -17,7 +17,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// Google 登入按鈕邏輯
+// 登入功能
 window.googleLogin = function () {
     signInWithPopup(auth, provider)
         .then((result) => {
@@ -33,10 +33,14 @@ window.googleLogin = function () {
         });
 };
 
-// 登入狀態監聽
+// 監聽登入狀態
 onAuthStateChanged(auth, (user) => {
     if (user) {
         console.log("使用者已登入", user);
+        document.getElementById("user-info").innerHTML = `
+            <p>Welcome back, ${user.displayName}!</p>
+            <p>Email: ${user.email}</p>
+        `;
     } else {
         console.log("尚未登入");
     }
