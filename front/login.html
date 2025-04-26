@@ -60,11 +60,11 @@
     signInWithRedirect(auth, provider);
   });
 
-  // 監聽登入狀態，一旦登入就跳轉 choose.html
+  // 監聽登入狀態，一旦登入就跳轉 index.html
   onAuthStateChanged(auth, (user) => {
     if (user) {
       console.log("登入成功，使用者資訊：", user);
-      window.location.href = "choose.html";  // 成功跳轉
+      window.location.href = "index.html";  // 成功跳轉到 index.html
     } else {
       console.log("尚未登入");
     }
