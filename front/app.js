@@ -255,33 +255,31 @@ window.confirmPassword = function() {
 };
 
 window.createSchedule = function() {
-    const currentUser = auth.currentUser; // 檢查是否有 Google 登入的使用者
+    const currentUser = auth.currentUser;
+    console.log("createSchedule called. currentUser:", currentUser); // <-- 加入 Log
 
     if (currentUser) {
         // 如果使用者已透過 Google 登入，直接跳轉
-        console.log("Google user logged in, proceeding to choose.html. User:", currentUser.uid);
-        // 可以考慮將 Google 使用者的資訊 (如 UID) 傳遞給下一頁
-        // 例如：window.location.href = `choose.html?uid=${currentUser.uid}`;
+        console.log("Google user detected. Redirecting to choose.html..."); // <-- 加入 Log
         window.location.href = 'choose.html';
     } else {
         // 如果沒有 Google 登入，執行本地的姓名和密碼驗證
+        console.log("Local validation path."); // <-- 加入 Log
         const isNameValid = window.confirmName(); // 調用驗證函數並獲取結果
         const isPasswordValid = window.confirmPassword(); // 調用驗證函數並獲取結果
 
         if (isNameValid && isPasswordValid) {
             // 只有當姓名和密碼都通過驗證時才跳轉
-            console.log("Local user validated, proceeding to choose.html");
-            // 將本地使用者資訊存儲到 localStorage (注意安全性考量，密碼不應明文儲存)
-            // 更好的做法是後端驗證，這裡僅作示例
+            console.log("Local user validated. Redirecting to choose.html..."); // <-- 加入 Log
             localStorage.setItem('timepick_user', JSON.stringify({ username: username /*, password: password // 不建議儲存密碼 */ }));
             window.location.href = 'choose.html';
         } else {
             // 如果有任何一個驗證失敗，提示使用者
-            // alert(isChinese ? langData.zh.bothError : langData.en.bothError); // 這個提示可能不夠精確，因為 feedback 區域已經顯示具體錯誤
-            console.log("Local validation failed.");
+            console.log("Local validation failed."); // <-- 加入 Log
         }
     }
 };
+
 
 window.howItWorks = function() {
     // 實現 "How It Works" 按鈕的功能，例如顯示一個彈出視窗或跳轉到說明頁面
