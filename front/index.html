@@ -24,7 +24,6 @@
     .title {
       position: absolute;
       top: 30px;
-      /* Center the title horizontally */
       left: 50%;
       transform: translateX(-50%);
       font-size: 48px;
@@ -36,8 +35,31 @@
       position: absolute;
       top: 20px;
       left: 20px;
-      font-size: 16px; /* Optional: Adjust font size if needed */
+      font-size: 16px;
+      z-index: 10; /* 確保按鈕在頂層 */
+      /* 初始狀態顯示，JS 會在登入後隱藏 */
+      display: block;
     }
+    /* Style for user info display (Avatar Container) */
+    #user-info {
+        position: absolute;
+        top: 15px; /* 稍微調整垂直位置，使其與按鈕視覺對齊 */
+        left: 20px;
+        z-index: 10; /* 確保頭像在頂層 */
+        display: none; /* 初始隱藏，JS 會在登入後顯示 */
+        line-height: 0; /* 避免圖片下方有多餘空間 */
+    }
+    /* Style for the Avatar Image itself */
+    .user-avatar {
+        width: 40px;  /* 設定頭像寬度 */
+        height: 40px; /* 設定頭像高度 */
+        border-radius: 50%; /* 關鍵：設置為圓形 */
+        object-fit: cover; /* 確保圖片填滿圓形區域，不變形 */
+        border: 1px solid #ddd; /* 可選：加個淺灰色邊框 */
+        cursor: pointer; /* 提示用戶可以點擊 (用於登出) */
+        background-color: #eee; /* 可選：圖片載入前的背景色 */
+    }
+
     .language-btn {
       position: absolute;
       top: 20px;
@@ -52,8 +74,8 @@
       background-color: white;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      /* Add margin-top to avoid overlap with title/buttons */
-      margin-top: 100px;
+      margin-top: 100px; /* 保持與頂部元素的距離 */
+      z-index: 1; /* 確保在背景之上 */
     }
     .how-it-works {
       position: absolute;
@@ -80,14 +102,7 @@
       background-color: #67AD5B;
       color: white;
     }
-    /* Style for user info display */
-    #user-info {
-        position: absolute;
-        top: 60px; /* Position below the google login button */
-        left: 20px;
-        font-size: 14px;
-    }
-    /* Adjust input group if button is removed */
+    /* Adjust input group if button is removed (保持不變) */
     .input-group .form-control {
         border-top-right-radius: var(--bs-border-radius);
         border-bottom-right-radius: var(--bs-border-radius);
@@ -99,10 +114,10 @@
 
   <h1 class="title">TIMEPICK</h1>
 
-  <!-- Google Login Button -->
+  <!-- Google Login Button (JS 會控制顯示/隱藏) -->
   <button id="google-login-btn" class="btn btn-outline-theme">使用 Google 登入</button>
 
-  <!-- User Info Display -->
+  <!-- User Info Display Area (JS 會填入頭像並顯示/隱藏) -->
   <div id="user-info"></div>
 
   <button class="btn language-btn" onclick="switchLanguage()">
@@ -113,17 +128,15 @@
     <!-- Name Section -->
     <div class="mb-4">
       <h2 class="fs-5" id="name-label">Enter Your Name</h2>
-      <!-- Removed the input-group div as the button is gone -->
       <input type="text" id="name" class="form-control mb-3" placeholder="Your Name" required>
-      <div id="name-feedback" class="invalid-feedback d-block"></div> <!-- Use d-block to always reserve space -->
+      <div id="name-feedback" class="invalid-feedback d-block"></div>
     </div>
 
     <!-- Password Section -->
     <div class="mb-4">
       <h2 class="fs-5" id="password-label">Enter Password</h2>
-      <!-- Removed the input-group div as the button is gone -->
       <input type="password" id="password" class="form-control mb-3" placeholder="Your Password" required>
-      <div id="password-feedback" class="invalid-feedback d-block"></div> <!-- Use d-block to always reserve space -->
+      <div id="password-feedback" class="invalid-feedback d-block"></div>
     </div>
 
     <button class="btn create-btn w-100" onclick="createSchedule()" id="create-btn">Create Your First Schedule</button>
