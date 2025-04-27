@@ -19,14 +19,24 @@
       align-items: center;
       background-color: #f8f9fa;
       font-family: Arial, sans-serif;
-      position: relative;
+      position: relative; /* Needed for absolute positioning of children */
     }
     .title {
       position: absolute;
       top: 30px;
+      /* Center the title horizontally */
+      left: 50%;
+      transform: translateX(-50%);
       font-size: 48px;
       font-weight: bold;
       color: #67AD5B;
+    }
+    /* Style for Google Login Button */
+    #google-login-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 16px; /* Optional: Adjust font size if needed */
     }
     .language-btn {
       position: absolute;
@@ -42,6 +52,8 @@
       background-color: white;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      /* Add margin-top to avoid overlap with title/buttons */
+      margin-top: 100px;
     }
     .how-it-works {
       position: absolute;
@@ -68,18 +80,25 @@
       background-color: #67AD5B;
       color: white;
     }
+    /* Style for user info display */
+    #user-info {
+        position: absolute;
+        top: 60px; /* Position below the google login button */
+        left: 20px;
+        font-size: 14px;
+    }
   </style>
 </head>
 
 <body>
 
-  <!-- 登入按鈕 -->
+  <h1 class="title">TIMEPICK</h1>
+
+  <!-- Google Login Button (Moved before login container for better structure) -->
   <button id="google-login-btn" class="btn btn-outline-theme">使用 Google 登入</button>
 
-  <!-- 顯示用戶資訊 -->
-  <div id="user-info" class="mt-4"></div>
-
-  <h1 class="title">TIMEPICK</h1>
+  <!-- User Info Display (Moved near Google button) -->
+  <div id="user-info"></div>
 
   <button class="btn language-btn" onclick="switchLanguage()">
     <span id="lang-text">Switch Language</span>
