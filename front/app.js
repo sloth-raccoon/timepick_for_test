@@ -23,15 +23,15 @@ document.getElementById('google-login-btn').addEventListener('click', googleLogi
 
 // Google 登入功能
 function googleLogin() {
-  signInWithPopup(auth, provider)
-    .then((result) => {
-      console.log("User signed in:", result.user);
-      showUserInfo(result.user);
-    })
-    .catch((error) => {
-      console.error("Error during Google login:", error);
-    });
-}
+    signInWithPopup(auth, provider) // <--- 就是這一行
+      .then((result) => {
+        console.log("User signed in:", result.user);
+        showUserInfo(result.user);
+      })
+      .catch((error) => {
+        console.error("Error during Google login:", error);
+      });
+}  
 
 // 監聽登入狀態
 onAuthStateChanged(auth, (user) => {
