@@ -1,76 +1,118 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>登入 - TimePick</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Log in - TIMEPICK</title>
+
+  <!-- Firebase SDK v9 -->
+  <script type="module" src="./app.js" defer></script>
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
     body {
-      background-color: #f0f2f5;
+      min-height: 100vh;
       display: flex;
-      align-items: center;
       justify-content: center;
-      height: 100vh;
+      align-items: center;
+      background-color: #f8f9fa;
+      font-family: Arial, sans-serif;
+      position: relative;
     }
-    .login-box {
-      background: white;
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      text-align: center;
+    .title {
+      position: absolute;
+      top: 30px;
+      font-size: 48px;
+      font-weight: bold;
+      color: #67AD5B;
+    }
+    .language-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 16px;
+      color: #67AD5B;
+    }
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .how-it-works {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      font-size: 16px;
+      color: #67AD5B;
+    }
+    .create-btn {
+      background-color: #67AD5B;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+    .create-btn:hover {
+      background-color: #558C4A;
+    }
+    .btn-outline-theme {
+      border-color: #67AD5B;
+      color: #67AD5B;
+    }
+    .btn-outline-theme:hover {
+      background-color: #67AD5B;
+      color: white;
     }
   </style>
 </head>
+
 <body>
 
-<div class="login-box">
-  <h1 class="mb-4">歡迎使用 TimePick</h1>
-  <button class="btn btn-primary" id="login-btn">使用 Google 登入</button>
-</div>
+  <!-- 登入按鈕 -->
+  <button id="google-login-btn" class="btn btn-outline-theme">使用 Google 登入</button>
 
-<!-- Bootstrap Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- 顯示用戶資訊 -->
+  <div id="user-info" class="mt-4"></div>
 
-<!-- Firebase -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithRedirect, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+  <h1 class="title">TIMEPICK</h1>
 
-  // Firebase 設定
-  const firebaseConfig = {
-    apiKey: "AIzaSyCq7lE6EK9hmCd8SDSTbvAZxrozVGXQZpo",
-    authDomain: "timepick-for-test.firebaseapp.com",
-    projectId: "timepick-for-test",
-    storageBucket: "timepick-for-test.appspot.com",
-    messagingSenderId: "14150496366",
-    appId: "1:14150496366:web:45cbdc5752a3dc1e43f67f"
-  };
+  <button class="btn language-btn" onclick="switchLanguage()">
+    <span id="lang-text">Switch Language</span>
+  </button>
 
-  // 初始化 Firebase
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+  <div class="login-container">
+    <!-- Name Section -->
+    <div class="mb-4">
+      <h2 class="fs-5" id="name-label">Enter Your Name</h2>
+      <div class="input-group mb-3">
+        <input type="text" id="name" class="form-control" placeholder="Your Name" required>
+        <button class="btn btn-outline-theme" onclick="confirmName()">Confirm</button>
+      </div>
+      <div id="name-feedback" class="invalid-feedback"></div>
+    </div>
 
-  // 按下登入按鈕，啟動 Google 登入流程
-  document.getElementById('login-btn').addEventListener('click', () => {
-    const provider = new GoogleAuthProvider();
-    signInWithRedirect(auth, provider);
-  });
+    <!-- Password Section -->
+    <div class="mb-4">
+      <h2 class="fs-5" id="password-label">Enter Password</h2>
+      <div class="input-group mb-3">
+        <input type="password" id="password" class="form-control" placeholder="Your Password" required>
+        <button class="btn btn-outline-theme" onclick="confirmPassword()">Confirm</button>
+      </div>
+      <div id="password-feedback" class="invalid-feedback"></div>
+    </div>
 
-  // 監聽登入狀態，一旦登入就跳轉 index.html
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log("登入成功，使用者資訊：", user);
-      window.location.href = "index.html";  // 成功跳轉到 index.html
-    } else {
-      console.log("尚未登入");
-    }
-  });
-</script>
+    <button class="btn create-btn w-100" onclick="createSchedule()" id="create-btn">Create Your First Schedule</button>
+  </div>
+
+  <button class="btn how-it-works" onclick="howItWorks()">How It Works</button>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
-
