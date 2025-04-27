@@ -224,18 +224,17 @@
     <!-- Firebase and Custom JavaScript -->
     <script type="module">
         // --- Firebase Initialization and Auth ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"; // Use consistent version
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"; // Use consistent version
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
-        // Ensure your Firebase config is correct
+        // Firebase config (保持不變)
         const firebaseConfig = {
             apiKey: "AIzaSyCq7lE6EK9hmCd8SDSTbvAZxrozVGXQZpo",
             authDomain: "timepick-for-test.firebaseapp.com",
             projectId: "timepick-for-test",
-            storageBucket: "timepick-for-test.appspot.com", // Corrected storage bucket
+            storageBucket: "timepick-for-test.appspot.com",
             messagingSenderId: "14150496366",
             appId: "1:14150496366:web:45cbdc5752a3dc1e43f67f"
-            // measurementId is often optional for Auth/basic Firestore
         };
 
         const app = initializeApp(firebaseConfig);
@@ -243,6 +242,7 @@
 
         // --- DOM Elements ---
         const userIconElement = document.getElementById('user-icon');
+        // ... (其他 DOM 元素獲取保持不變)
         const timetableNameInput = document.getElementById('timetable-name');
         const startTimeSelect = document.getElementById('start-time');
         const endTimeSelect = document.getElementById('end-time');
@@ -252,54 +252,117 @@
         const timeErrorElement = document.getElementById('time-error');
         const dateErrorElement = document.getElementById('date-error');
 
-        // --- Global State ---
-        let currentYear = new Date().getFullYear();
-        let currentMonth = new Date().getMonth(); // 0-11
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Normalize today's date
-        let selectedDates = new Set(); // Store selected dates (YYYY-MM-DD)
 
-        // --- Authentication Guard ---
+        // --- Global State --- (保持不變)
+        let currentYear = new Date().getFullYear();
+        let currentMonth = new Date().getMonth();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let selectedDates = new Set();
+
+        // --- Authentication Guard (修改後) ---
         onAuthStateChanged(auth, (user) => {
-            console.log("Auth state checked on choose.html. User:", user ? user.uid : 'None');
-            if (user) {
-                // User is signed in, update UI
-                if (userIconElement) {
-                    userIconElement.src = user.photoURL || './default-avatar.png'; // Use default if no photoURL
-                    userIconElement.alt = user.displayName || 'User Avatar';
-                    userIconElement.title = `Logged in as ${user.displayName || user.email}\nClick to logout`;
-                    userIconElement.onclick = () => logout(); // Assign logout function directly
+            console.log("Auth state checked on choose.html. Firebase User:", user ? user.uid : 'None');
+
+            // *** 新增：檢查本地存儲的登入資訊 ***
+            const localUserString = localStorage.getItem('timepick_user');
+            let localUser = null;
+            if (localUserString) {
+                try {
+                    localUser = JSON.parse(localUserString);
+                    // 簡單驗證本地用戶物件是否有效 (至少要有 username)
+                    if (!localUser || !localUser.username) {
+                        console.log("Invalid local user data found, removing.");
+                        localStorage.removeItem('timepick_user');
+                        localUser = null; // 設為 null
+                    } else {
+                         console.log("Found valid local user session:", localUser);
+                    }
+                } catch (e) {
+                    console.error("Error parsing local user session:", e);
+                    localStorage.removeItem('timepick_user'); // 清除無效數據
                 }
-                // Initialize page content now that user is confirmed
-                initializePage();
+            }
+            // *** 檢查結束 ***
+
+            if (user) {
+                // --- Firebase 使用者已登入 ---
+                console.log("Firebase user authenticated. Initializing page.");
+                // 如果 Firebase 登入，可以選擇性地清除本地登入資訊
+                // localStorage.removeItem('timepick_user');
+                initializePage(user); // 傳遞 Firebase user 物件
+                updateUserIcon(user); // 更新頭像為 Firebase 用戶
+
+            } else if (localUser) {
+                // --- 沒有 Firebase 登入，但有本地登入資訊 ---
+                console.log("Local user session found. Initializing page.");
+                initializePage(null); // 沒有 Firebase user 物件
+                updateUserIcon(null, localUser); // 更新頭像為本地用戶
+
             } else {
-                // No user is signed in, redirect to index.html (which handles login/signup)
-                console.log("No user found on choose.html, redirecting to index.html.");
-                window.location.href = "index.html"; // Redirect to index page
+                // --- Firebase 未登入，也沒有本地登入資訊 ---
+                console.log("No authenticated user (Firebase or local) found on choose.html, redirecting to index.html.");
+                window.location.href = "index.html"; // 重定向到 index 頁面
             }
         });
 
-        // --- Logout Function ---
-        function logout() {
+        // --- 更新使用者頭像函數 (新增/修改) ---
+        function updateUserIcon(firebaseUser, localUser = null) {
+            if (!userIconElement) return; // 如果元素不存在則返回
+
+            if (firebaseUser) {
+                // 顯示 Firebase 用戶頭像
+                userIconElement.src = firebaseUser.photoURL || './default-avatar.png';
+                userIconElement.alt = firebaseUser.displayName || 'User Avatar';
+                userIconElement.title = `Logged in as ${firebaseUser.displayName || firebaseUser.email}\nClick to logout (Google)`;
+                userIconElement.onclick = () => logoutFirebase(); // 綁定 Firebase 登出
+            } else if (localUser) {
+                // 顯示本地用戶的預設頭像和名稱
+                userIconElement.src = './default-avatar.png'; // 本地用戶使用預設頭像
+                userIconElement.alt = localUser.username;
+                userIconElement.title = `Logged in as ${localUser.username}\nClick to logout (Local)`;
+                userIconElement.onclick = () => logoutLocal(); // 綁定本地登出
+            } else {
+                 // 理論上不應該到達這裡，但作為防禦
+                 userIconElement.style.display = 'none';
+            }
+        }
+
+
+        // --- Logout Function (Firebase) ---
+        function logoutFirebase() {
             signOut(auth).then(() => {
-                console.log("User signed out successfully.");
-                // onAuthStateChanged will trigger the redirect to index.html
+                console.log("Firebase user signed out successfully.");
+                // onAuthStateChanged 會自動檢測到變化並觸發重定向
             }).catch((error) => {
-                console.error("Error signing out:", error);
+                console.error("Error signing out Firebase user:", error);
                 alert("Error signing out. Please try again.");
             });
         }
 
-        // --- Page Initialization ---
-        function initializePage() {
+        // --- Logout Function (Local) (新增) ---
+        function logoutLocal() {
+            console.log("Logging out local user.");
+            localStorage.removeItem('timepick_user');
+            // 清除本地存儲後，手動重定向到 index 頁面
+            window.location.href = "index.html";
+        }
+
+
+        // --- Page Initialization (修改：接受 user 參數) ---
+        function initializePage(authenticatedUser) { // 參數可以是 firebase user 或 null
             console.log("Initializing choose.html content...");
+            // 這裡可以根據 authenticatedUser 是否存在來做一些特定的 UI 調整 (如果需要)
+            // 例如：顯示不同的歡迎訊息
+
             populateTimeOptions();
             renderCalendar();
             setupEventListeners();
         }
 
-        // --- Populate Time Select Options ---
+        // --- Populate Time Select Options --- (保持不變)
         function populateTimeOptions() {
+            // ... (程式碼不變)
             const timeOptions = [];
             for (let i = 0; i < 24; i++) {
                 const hour = String(i).padStart(2, '0');
@@ -309,13 +372,13 @@
             const optionsHTML = timeOptions.join('');
             startTimeSelect.innerHTML = optionsHTML;
             endTimeSelect.innerHTML = optionsHTML;
-            // Set a default reasonable range if needed, e.g., 9:00 to 17:00
             startTimeSelect.value = "09:00";
             endTimeSelect.value = "17:00";
         }
 
-        // --- Calendar Rendering Logic ---
+        // --- Calendar Rendering Logic --- (保持不變)
         function renderCalendar() {
+            // ... (程式碼不變)
             const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay(); // 0 (Sun) - 6 (Sat)
             const lastDateOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
             const lastDayOfPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
@@ -350,7 +413,6 @@
                         const prevMonthIndex = currentMonth === 0 ? 11 : currentMonth - 1;
                         dateStr = `${prevMonthYear}-${String(prevMonthIndex + 1).padStart(2, '0')}-${String(prevMonthDate).padStart(2, '0')}`;
                         cellContent = prevMonthDate;
-                        // Optionally disable past dates from previous month
                         isDisabled = new Date(prevMonthYear, prevMonthIndex, prevMonthDate) < today;
                         prevMonthDate++;
                     } else if (date > lastDateOfMonth) {
@@ -381,7 +443,6 @@
                     calendarHTML += `<td class="${cellClasses}" data-date="${dateStr}">${cellContent}</td>`;
                 }
                 calendarHTML += "</tr>";
-                // Stop rendering rows if we've passed the last date and filled the necessary rows
                 if (date > lastDateOfMonth && i >= Math.ceil((firstDayOfMonth + lastDateOfMonth) / 7) - 1) {
                     break;
                 }
@@ -390,15 +451,15 @@
             calendarHTML += "</tbody></table>";
             calendarElement.innerHTML = calendarHTML;
 
-            // Re-attach month navigation listeners after rendering
             const prevBtn = calendarElement.querySelector("#prev-month-btn");
             const nextBtn = calendarElement.querySelector("#next-month-btn");
             if (prevBtn) prevBtn.addEventListener("click", prevMonth);
             if (nextBtn) nextBtn.addEventListener("click", nextMonth);
         }
 
-        // --- Calendar Interaction ---
+        // --- Calendar Interaction --- (保持不變)
         function handleDateClick(event) {
+            // ... (程式碼不變)
             const targetCell = event.target;
             if (targetCell.matches("td.date-cell:not(.disabled)")) {
                 const dateStr = targetCell.dataset.date;
@@ -410,16 +471,17 @@
                     targetCell.classList.add("selected");
                 }
                 updateSelectedDatesCount();
-                // Clear date error on interaction
                 dateErrorElement.textContent = '';
             }
         }
 
         function updateSelectedDatesCount() {
-            selectedDatesInfoElement.textContent = `Selected dates: ${selectedDates.size}`;
+            // ... (程式碼不變)
+             selectedDatesInfoElement.textContent = `Selected dates: ${selectedDates.size}`;
         }
 
         function prevMonth() {
+            // ... (程式碼不變)
             currentMonth--;
             if (currentMonth < 0) {
                 currentMonth = 11;
@@ -429,6 +491,7 @@
         }
 
         function nextMonth() {
+            // ... (程式碼不變)
             currentMonth++;
             if (currentMonth > 11) {
                 currentMonth = 0;
@@ -437,10 +500,11 @@
             renderCalendar();
         }
 
-        // --- Input Validation ---
+        // --- Input Validation --- (保持不變)
         function validateInputs() {
+            // ... (程式碼不變)
             let isValid = true;
-            timeErrorElement.textContent = ''; // Clear previous errors
+            timeErrorElement.textContent = '';
             dateErrorElement.textContent = '';
             timetableNameInput.classList.remove('is-invalid');
             startTimeSelect.classList.remove('is-invalid');
@@ -459,7 +523,6 @@
                  isValid = false;
             }
 
-            // Validate time range
             const startHour = parseInt(startTimeSelect.value.split(':')[0]);
             const endHour = parseInt(endTimeSelect.value.split(':')[0]);
             if (startHour >= endHour) {
@@ -469,64 +532,58 @@
                 isValid = false;
             }
 
-            // Validate date selection
             if (selectedDates.size === 0) {
                 dateErrorElement.textContent = "Please select at least one date.";
-                // Optionally add a visual indicator to the calendar container
-                // calendarElement.classList.add('is-invalid');
                 isValid = false;
             }
 
             return isValid;
         }
 
-        // --- Confirm Action ---
+        // --- Confirm Action --- (保持不變)
         function confirmSchedule() {
+            // ... (程式碼不變)
             console.log("Confirm button clicked.");
             if (!validateInputs()) {
                 console.log("Validation failed.");
-                return; // Stop if validation fails
+                return;
             }
 
             console.log("Validation passed.");
-            confirmBtn.disabled = true; // Disable button to prevent multiple clicks
+            confirmBtn.disabled = true;
             confirmBtn.textContent = "Saving...";
 
             const scheduleData = {
                 timetableName: timetableNameInput.value.trim(),
                 startTime: startTimeSelect.value,
                 endTime: endTimeSelect.value,
-                selectedDates: Array.from(selectedDates).sort() // Sort dates for consistency
+                selectedDates: Array.from(selectedDates).sort()
             };
 
             try {
                 localStorage.setItem('schedule_data', JSON.stringify(scheduleData));
                 console.log("Data saved to localStorage:", scheduleData);
                 console.log("Redirecting to newthird.html...");
-                window.location.href = 'newthird.html'; // Redirect to the next page
+                window.location.href = 'newthird.html';
             } catch (error) {
                 console.error("Error saving data to localStorage or redirecting:", error);
                 alert("An error occurred while saving your schedule. Please check console for details.");
-                confirmBtn.disabled = false; // Re-enable button on error
+                confirmBtn.disabled = false;
                 confirmBtn.textContent = "Confirm and Proceed";
             }
         }
 
-        // --- Setup Event Listeners ---
+        // --- Setup Event Listeners --- (保持不變)
         function setupEventListeners() {
-             // Use event delegation for calendar clicks for better performance
+            // ... (程式碼不變)
             calendarElement.addEventListener('click', handleDateClick);
             confirmBtn.addEventListener('click', confirmSchedule);
-
-            // Add listeners to clear time error on change
             startTimeSelect.addEventListener('change', () => { timeErrorElement.textContent = ''; startTimeSelect.classList.remove('is-invalid'); endTimeSelect.classList.remove('is-invalid'); });
             endTimeSelect.addEventListener('change', () => { timeErrorElement.textContent = ''; startTimeSelect.classList.remove('is-invalid'); endTimeSelect.classList.remove('is-invalid'); });
             timetableNameInput.addEventListener('input', () => { timetableNameInput.classList.remove('is-invalid'); });
         }
 
-        // No need to wrap in DOMContentLoaded because the script is type="module"
-        // and placed at the end of the body, but the auth check handles initialization timing.
-
     </script>
 </body>
 </html>
+
