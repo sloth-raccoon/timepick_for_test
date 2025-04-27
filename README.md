@@ -1,2 +1,4 @@
 # timepick_for_test
 測試用
+Timepick幫助團體快速找到適合的討論時間，無論是公事討論或是朋友聚會皆適合
+使用Timepick提高效率
