@@ -5,70 +5,131 @@
   <title>登入 - TimePick</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Bootstrap -->
+  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
+    html, body {
+      height: 100%; /* 確保 body 可以佔滿整個視窗高度 */
+    }
     body {
-      background-color: #f0f2f5;
+      background-color: #f0f2f5; /* 淺灰色背景 */
       display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
+      align-items: center; /* 垂直居中 */
+      justify-content: center; /* 水平居中 */
+      text-align: center; /* 讓 login-box 內的文字也居中 */
     }
     .login-box {
       background: white;
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      text-align: center;
+      padding: 3rem 2rem; /* 增加上下 padding */
+      border-radius: 1rem; /* 圓角 */
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* 稍微加深陰影 */
+      max-width: 400px; /* 限制最大寬度 */
+      width: 90%; /* 在小螢幕上佔用 90% 寬度 */
+    }
+    .login-box h1 {
+        color: #67AD5B; /* 使用你的主題綠色 */
+        font-weight: bold;
+        margin-bottom: 2rem; /* 增加標題和按鈕間距 */
+    }
+    .btn-google {
+        background-color: #4285F4; /* Google 藍色 */
+        color: white;
+        font-size: 1.1rem;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        display: flex; /* 使用 flex 讓 icon 和文字對齊 */
+        align-items: center;
+        justify-content: center; /* 水平居中內容 */
+        gap: 0.5rem; /* icon 和文字間距 */
+        width: 100%; /* 按鈕寬度佔滿容器 */
+    }
+    .btn-google:hover {
+        background-color: #357ae8;
+        color: white;
+    }
+    /* 簡單的 Google icon SVG */
+    .google-icon {
+        width: 20px;
+        height: 20px;
     }
   </style>
 </head>
 <body>
 
 <div class="login-box">
-  <h1 class="mb-4">歡迎使用 TimePick</h1>
-  <button class="btn btn-primary" id="login-btn">使用 Google 登入</button>
+  <h1>歡迎使用 TIMEPICK</h1>
+  <button class="btn btn-google" id="login-btn">
+    <!-- Google Icon SVG -->
+    <svg class="google-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+        <path fill="none" d="M0 0h48v48H0z"></path>
+    </svg>
+    使用 Google 登入
+  </button>
 </div>
 
-<!-- Bootstrap Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap Bundle JS (通常不需要，除非用到 Bootstrap 的 JS 元件) -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> -->
 
 <!-- Firebase -->
 <script type="module">
+  // 匯入必要的 Firebase 模組
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithRedirect, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
-  // Firebase 設定
+  // 你的 Firebase 設定 (請確保這是正確的)
   const firebaseConfig = {
-    apiKey: "AIzaSyCq7lE6EK9hmCd8SDSTbvAZxrozVGXQZpo",
+    apiKey: "AIzaSyCq7lE6EK9hmCd8SDSTbvAZxrozVGXQZpo", // 確保這是你的真實 Key
     authDomain: "timepick-for-test.firebaseapp.com",
     projectId: "timepick-for-test",
-    storageBucket: "timepick-for-test.appspot.com",
+    storageBucket: "timepick-for-test.appspot.com", // 修正: 移除 .firebasestorage
     messagingSenderId: "14150496366",
     appId: "1:14150496366:web:45cbdc5752a3dc1e43f67f"
+    // measurementId 通常不需要用於 Authentication
   };
 
   // 初始化 Firebase
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const provider = new GoogleAuthProvider(); // 創建 Provider 實例
 
-  // 按下登入按鈕，啟動 Google 登入流程
-  document.getElementById('login-btn').addEventListener('click', () => {
-    const provider = new GoogleAuthProvider();
-    signInWithRedirect(auth, provider);
+  // 獲取登入按鈕元素
+  const loginButton = document.getElementById('login-btn');
+
+  // 為登入按鈕添加點擊事件監聽器
+  loginButton.addEventListener('click', () => {
+    console.log("Login button clicked, initiating Google Sign-In redirect...");
+    // 啟動 Google 登入流程 (頁面跳轉)
+    signInWithRedirect(auth, provider).catch(error => {
+        // 處理啟動跳轉時可能發生的錯誤
+        console.error("Error starting Google redirect login:", error);
+        alert(`啟動登入時發生錯誤: ${error.message}`);
+    });
   });
 
-  // 監聽登入狀態
+  // 監聽 Firebase Authentication 狀態的變化
+  // 這個函數會在頁面載入時、登入成功跳轉回來時、登出時觸發
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      console.log("登入成功，使用者資訊：", user);
-      window.location.href = "index.html";  // 成功跳轉到 index.html
+      // 如果 user 物件存在，表示使用者已登入
+      console.log("User is signed in on login.html, redirecting to index.html. User:", user.uid);
+      // 跳轉到主應用程式頁面 (index.html)
+      window.location.href = "index.html";
     } else {
-      console.log("尚未登入，檢查登入流程");
+      // 如果 user 為 null，表示使用者未登入
+      console.log("User is signed out on login.html.");
+      // 在這個頁面，未登入是正常狀態，不需要做特別處理
+      // 確保登入按鈕是可見且可點擊的 (雖然預設就是這樣)
     }
   });
+
+  // 注意：login.html 不需要 getRedirectResult，因為我們只關心最終的登入狀態
+  // onAuthStateChanged 會在跳轉回來後自動處理登入狀態的更新。
+
 </script>
 
 </body>
