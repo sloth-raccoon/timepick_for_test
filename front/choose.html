@@ -3,117 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TimePick</title>
+    <title>Create Schedule - TimePick</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    
-    <!-- Firebase SDK -->
-    <script type="module">
-        // Firebase CDN 版 (modular v9)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-
-        const firebaseConfig = {
-        apiKey: "AIzaSyCq7lE6EK9hmCd8SDSTbvAZxrozVGXQZpo",
-        authDomain: "timepick-for-test.firebaseapp.com",
-        projectId: "timepick-for-test",
-        storageBucket: "timepick-for-test.firebasestorage.app",
-        messagingSenderId: "14150496366",
-        appId: "1:14150496366:web:45cbdc5752a3dc1e43f67f",
-        measurementId: "G-51J471CXLQ"
-        };
-
-        // 初始化 Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        // 監聽登入狀態
-        onAuthStateChanged(auth, (user) => {
-        if (user) {
-            // 登入中
-            const photoURL = user.photoURL;
-            const userIcon = document.getElementById('user-icon');
-            if (photoURL) {
-            userIcon.src = photoURL;
-            } else {
-            userIcon.src = 'default_icon.png'; // 預設大頭貼（你可以自己放一個）
-            }
-        } else {
-            // 沒登入，跳回login.html
-            window.location.href = "login.html";
-        }
-        });
-
-        // 登出功能（如果你想加）
-        function logout() {
-        signOut(auth).then(() => {
-            window.location.href = "login.html";
-        });
-        }
-
-        window.logout = logout;
-    </script>
 
     <style>
-        /* 簡單讓頭像在右上角 */
-        #user-container {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        }
-        #user-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        cursor: pointer;
-        }
-    </style>
-
-    <!-- Custom CSS -->
-    <style>
+        /* --- General Styles --- */
         body {
             min-height: 100vh;
             background-color: #f8f9fa;
-            padding-top: 40px;
+            padding-top: 70px; /* Increased padding to avoid overlap with fixed user icon */
+            padding-bottom: 20px;
             font-family: Arial, sans-serif;
+            position: relative; /* Needed for absolute positioning of user icon */
         }
         h1 {
             font-size: 36px;
             font-weight: bold;
             color: #67AD5B;
-            margin-bottom: 20px;
+            margin-bottom: 30px; /* Increased margin */
         }
         .container {
             max-width: 700px;
             background-color: white;
-            padding: 20px;
+            padding: 30px; /* Increased padding */
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow */
         }
-        .input-group label, .time-select label, .date-label {
+        .section-title {
             font-weight: bold;
-            margin-right: 10px;
+            margin-bottom: 15px; /* Increased margin */
+            color: #343a40;
+            display: block; /* Ensure it takes full width */
         }
         .form-label {
             margin-bottom: 5px;
+            font-weight: 500; /* Slightly less bold than section title */
         }
+
+        /* --- User Icon --- */
+        #user-container {
+            position: absolute; /* Changed to absolute relative to body */
+            top: 15px;
+            right: 20px;
+            z-index: 1050; /* Ensure it's above most elements */
+        }
+        #user-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            object-fit: cover;
+            background-color: #eee; /* Placeholder background */
+        }
+
+        /* --- Calendar Styles --- */
         .calendar-container {
             border: 1px solid #ddd;
-            padding: 10px;
+            padding: 15px; /* Increased padding */
             border-radius: 5px;
             width: 100%;
-            /* 調整月曆寬度以適應內容 */
-            max-width: 350px; /* 稍微加寬 */
-            margin-bottom: 20px;
+            max-width: 380px; /* Adjusted width */
+            margin-bottom: 15px; /* Adjusted margin */
         }
         .calendar-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-weight: bold;
-            font-size: 14px; /* 可稍微加大 */
-            margin-bottom: 10px;
+            font-size: 1rem; /* Adjusted font size */
+            margin-bottom: 15px; /* Increased margin */
         }
         .calendar-header button {
             background: none;
@@ -121,338 +82,520 @@
             cursor: pointer;
             color: #67AD5B;
             font-weight: bold;
-            font-size: 1.2em; /* 讓按鈕更明顯 */
+            font-size: 1.4em; /* Adjusted size */
+            padding: 0 5px; /* Added padding for easier clicking */
         }
         .calendar-table {
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
         }
-        .calendar-table th, .calendar-table td {
-            /* width: 40px; */ /* 移除固定寬度，讓其自適應 */
-            height: 40px;
+        .calendar-table th,
+        .calendar-table td {
+            height: 45px; /* Increased height */
             text-align: center;
-            border: 1px solid #ddd;
-            font-size: 12px;
+            border: 1px solid #eee; /* Lighter border */
+            font-size: 0.85rem; /* Adjusted font size */
             cursor: pointer;
-            padding: 5px; /* 增加內邊距 */
+            padding: 5px;
+            vertical-align: middle; /* Center content vertically */
         }
         .calendar-table th {
-             font-weight: bold; /* 加粗星期標題 */
-             background-color: #f8f9fa; /* 淺灰色背景 */
+             font-weight: bold;
+             background-color: #f8f9fa;
+             color: #6c757d; /* Grayish text for headers */
+             cursor: default;
         }
-        .calendar-table td:hover:not(.disabled):not(.not-current-month) {
+        .calendar-table td:not(.disabled):not(.not-current-month):hover {
             background-color: #e9ecef;
         }
-        /* 使用 CSS 控制不可點擊 */
+        .calendar-table td.date-cell {
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out; /* Smooth transition */
+        }
+        /* Disabled (Past) Dates */
         .calendar-table td.disabled {
-            background-color: #f8f9fa;
-            color: #ccc;
-            cursor: not-allowed;
-            pointer-events: none; /* CSS 控制不可點擊 */
-        }
-        .calendar-table td.next-month-preview {
-            color: #aaa; /* 使用稍淺的灰色文字以區分 */
-            cursor: pointer; /* 確保鼠標是可點擊樣式 */
-        }
-        .calendar-table td.next-month-preview:hover:not(.disabled) {
-            background-color: #e9ecef; /* 與當前月份日期使用相同的 hover 背景色 */
-        }
-        /* 這個 class 用於上個月的日期 */
-        .calendar-table td.not-current-month {
-            background-color: #f8f9fa; /* 淺灰色背景 */
-            color: #ccc; /* 淺灰色文字 */
-            /*cursor: not-allowed; /* 不允許的鼠標樣式 */
-            /*pointer-events: none; /* 阻止點擊事件 */
-        }
-        .calendar-table td.not-current-month:hover:not(.disabled) {
-            background-color: #e9ecef; /* 與其他日期使用相同的 hover 背景色 */
-        }
-        .calendar-table td.disabled {
-            background-color: #f8f9fa !important; /* 使用 !important 確保覆蓋其他背景 */
-            color: #ccc !important; /* 使用 !important 確保覆蓋其他顏色 */
+            background-color: #f8f9fa !important;
+            color: #ced4da !important; /* Lighter gray */
             cursor: not-allowed;
             pointer-events: none;
         }
-        .selected {
-            background-color: #67AD5B !important;
-            color: white !important; /* 確保文字顏色是白色 */
+        /* Other Month Dates (Preview) */
+        .calendar-table td.not-current-month,
+        .calendar-table td.next-month-preview {
+            color: #adb5bd; /* Slightly darker gray for visibility */
         }
+        .calendar-table td.not-current-month:not(.disabled):hover,
+        .calendar-table td.next-month-preview:not(.disabled):hover {
+             background-color: #e9ecef;
+        }
+        /* Selected Dates */
+        .calendar-table td.selected {
+            background-color: #67AD5B !important;
+            color: white !important;
+            font-weight: bold;
+        }
+
+        /* --- Selected Dates Info --- */
+        .selected-dates-info {
+            font-size: 0.9rem; /* Adjusted size */
+            color: #495057; /* Darker gray */
+            margin-top: 10px;
+        }
+
+        /* --- Confirm Button --- */
         .confirm-btn {
             background-color: #67AD5B;
             border: none;
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 12px 25px; /* Increased padding */
+            font-size: 1rem; /* Adjusted size */
             border-radius: 5px;
-            color: white; /* 確保按鈕文字是白色 */
+            color: white;
+            transition: background-color 0.2s ease; /* Smooth transition */
         }
         .confirm-btn:hover {
             background-color: #558C4A;
         }
-        .section-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #343a40;
+        .confirm-btn:disabled {
+             background-color: #a5d6a7; /* Lighter green when disabled */
+             cursor: not-allowed;
         }
-        .selected-dates-info {
-            font-size: 14px;
-            color: #343a40;
-            margin-top: 5px;
+        /* --- Validation Feedback --- */
+        .invalid-feedback {
+            color: #dc3545; /* Bootstrap's default danger color */
+            font-size: 0.875em;
+        }
+        input.is-invalid, select.is-invalid {
+            border-color: #dc3545;
         }
     </style>
 </head>
 <body>
+    <!-- User Icon Container -->
+    <div id="user-container">
+        <img id="user-icon" src="./default-avatar.png" alt="User Avatar" title="Click to logout"> <!-- Default image, title for tooltip -->
+    </div>
+
     <h1 class="text-center">TIMEPICK</h1>
+
     <div class="container">
         <!-- Timetable Name -->
         <div class="mb-4">
             <label for="timetable-name" class="form-label section-title">1. Timetable Name:</label>
-            <input type="text" id="timetable-name" class="form-control" placeholder="Enter name">
+            <input type="text" id="timetable-name" class="form-control" placeholder="e.g., Project Meeting, Study Group" required>
+             <div class="invalid-feedback">Please enter a name for your timetable.</div>
         </div>
 
         <!-- Available Time -->
         <div class="mb-4">
-            <span class="section-title">2. Select Available Time:</span>
+            <span class="section-title">2. Select Available Time Range:</span>
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label for="available-time" class="form-label">From:</label>
-                    <select id="available-time" class="form-select"></select>
+                    <label for="start-time" class="form-label">From:</label>
+                    <select id="start-time" class="form-select" required></select>
+                    <div class="invalid-feedback">Please select a start time.</div>
                 </div>
                 <div class="col-md-6">
                     <label for="end-time" class="form-label">To:</label>
-                    <select id="end-time" class="form-select"></select>
+                    <select id="end-time" class="form-select" required></select>
+                    <div class="invalid-feedback">Please select an end time.</div>
                 </div>
             </div>
+            <div id="time-error" class="invalid-feedback d-block mt-2"></div> <!-- Placeholder for time range error -->
         </div>
 
         <!-- Date Selection -->
         <div class="mb-4">
-            <span class="section-title">3. Select Dates:</span>
+            <span class="section-title">3. Select Available Dates:</span>
             <div class="row g-3">
-                <div class="col-md-12 d-flex justify-content-center"> <!-- 將月曆置中 -->
-                    <div> <!-- 包裹月曆和計數器 -->
-                        <div class="calendar-container" id="calendar"></div>
-                        <div class="selected-dates-info text-center" id="selected-dates-info">Selected dates: 0</div> <!-- 計數器也置中 -->
+                <div class="col-md-12 d-flex justify-content-center">
+                    <div>
+                        <div class="calendar-container" id="calendar">
+                            <!-- Calendar will be rendered here by JS -->
+                            <div class="text-center p-5">Loading Calendar...</div>
+                        </div>
+                        <div class="selected-dates-info text-center" id="selected-dates-info">Selected dates: 0</div>
+                        <div id="date-error" class="invalid-feedback d-block text-center mt-2"></div> <!-- Placeholder for date selection error -->
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Confirm Button -->
-        <div class="text-center"> <!-- 將按鈕置中 -->
-            <button id="confirm-btn" class="btn confirm-btn">Confirm</button>
+        <div class="text-center mt-4"> <!-- Added margin top -->
+            <button id="confirm-btn" class="btn confirm-btn">Confirm and Proceed</button>
         </div>
     </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
-     <!-- 使用者頭像容器 -->
-    <div id="user-container">
-        <img id="user-icon" src="default_icon.png" alt="User Icon" onclick="logout()">
-    </div>
+    <!-- Firebase and Custom JavaScript -->
+    <script type="module">
+        // --- Firebase Initialization and Auth ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"; // Use consistent version
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"; // Use consistent version
 
-    <!-- Custom JavaScript -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // --- Populate Time Options ---
-            function populateTimeOptions() {
-                const timeOptions = [];
-                for (let i = 0; i < 24; i++) {
-                    let time = i.toString().padStart(2, '0') + ":00";
-                    timeOptions.push(`<option value="${time}">${time}</option>`);
-                }
-                document.getElementById("available-time").innerHTML = timeOptions.join('');
-                document.getElementById("end-time").innerHTML = timeOptions.join('');
-            }
+        // Ensure your Firebase config is correct
+        const firebaseConfig = {
+            apiKey: "AIzaSyCq7lE6EK9hmCd8SDSTbvAZxrozVGXQZpo",
+            authDomain: "timepick-for-test.firebaseapp.com",
+            projectId: "timepick-for-test",
+            storageBucket: "timepick-for-test.appspot.com", // Corrected storage bucket
+            messagingSenderId: "14150496366",
+            appId: "1:14150496366:web:45cbdc5752a3dc1e43f67f"
+            // measurementId is often optional for Auth/basic Firestore
+        };
 
-            // --- Calendar Logic ---
-            let currentYear = new Date().getFullYear();
-            let currentMonth = new Date().getMonth(); // 0-11
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Set time to midnight for accurate date comparison
-            let selectedDates = new Set(); // Store selected dates (YYYY-MM-DD format) globally
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-            // Cache DOM elements for performance
-            const calendarElement = document.getElementById("calendar");
-            const selectedDatesInfoElement = document.getElementById("selected-dates-info");
+        // --- DOM Elements ---
+        const userIconElement = document.getElementById('user-icon');
+        const timetableNameInput = document.getElementById('timetable-name');
+        const startTimeSelect = document.getElementById('start-time');
+        const endTimeSelect = document.getElementById('end-time');
+        const calendarElement = document.getElementById('calendar');
+        const selectedDatesInfoElement = document.getElementById('selected-dates-info');
+        const confirmBtn = document.getElementById('confirm-btn');
+        const timeErrorElement = document.getElementById('time-error');
+        const dateErrorElement = document.getElementById('date-error');
 
-            // --- Month Navigation Functions ---
-            function prevMonth() {
-                currentMonth--;
-                if (currentMonth < 0) {
-                    currentMonth = 11;
-                    currentYear--;
-                }
-                renderCalendar();
-            }
+        // --- Global State ---
+        let currentYear = new Date().getFullYear();
+        let currentMonth = new Date().getMonth(); // 0-11
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Normalize today's date
+        let selectedDates = new Set(); // Store selected dates (YYYY-MM-DD)
 
-            function nextMonth() {
-                currentMonth++;
-                if (currentMonth > 11) {
-                    currentMonth = 0;
-                    currentYear++;
-                }
-                renderCalendar();
-            }
+        // --- Authentication Guard (Modified) ---
+        onAuthStateChanged(auth, (user) => {
+            console.log("Auth state checked on choose.html. Firebase User:", user ? user.uid : 'None');
 
-            // --- Update Selected Dates Count Display ---
-            function updateSelectedDatesCount() {
-                const selectedCount = selectedDates.size;
-                selectedDatesInfoElement.textContent = `Selected dates: ${selectedCount}`;
-            }
-
-            // --- Render Calendar Function ---
-            function renderCalendar() {
-                const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay(); // 0 (Sun) - 6 (Sat)
-                const lastDateOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-                const lastDayOfPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
-
-                // --- Calendar Header ---
-                let calendarHTML = `
-                    <div class="calendar-header">
-                        <button id="prev-month-btn">◀</button>
-                        <span>${new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' })} ${currentYear}</span>
-                        <button id="next-month-btn">▶</button>
-                    </div>
-                    <table class="calendar-table">
-                        <thead>
-                            <tr>
-                                <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
-
-                let date = 1;
-                let prevMonthDate = lastDayOfPrevMonth - firstDayOfMonth + 1;
-
-                // --- Calendar Body (Weeks and Days) ---
-                for (let i = 0; i < 6; i++) { // Max 6 rows needed for a month
-                    calendarHTML += "<tr>";
-                    for (let j = 0; j < 7; j++) { // 7 days a week
-                        // --- Previous Month's Dates ---
-                        if (i === 0 && j < firstDayOfMonth) {
-                            const prevMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-                            const prevMonthIndex = currentMonth === 0 ? 11 : currentMonth - 1;
-                            const dateStr = `${prevMonthYear}-${String(prevMonthIndex + 1).padStart(2, '0')}-${String(prevMonthDate).padStart(2, '0')}`;
-                            const isSelected = selectedDates.has(dateStr);
-                            calendarHTML += `<td class="date-cell not-current-month ${isSelected ? 'selected' : ''}" data-date="${dateStr}">${prevMonthDate}</td>`;
-                            prevMonthDate++;
-                        }
-                        // --- Next Month's Dates ---
-                        else if (date > lastDateOfMonth) {
-                            const nextMonthDate = date - lastDateOfMonth;
-                            const nextMonthYear = currentMonth === 11 ? currentYear + 1 : currentYear;
-                            const nextMonthIndex = currentMonth === 11 ? 0 : currentMonth + 1;
-                            const dateObj = new Date(nextMonthYear, nextMonthIndex, nextMonthDate);
-                            const isPastDate = dateObj < today;
-                            const dateStr = `${nextMonthYear}-${String(nextMonthIndex + 1).padStart(2, '0')}-${String(nextMonthDate).padStart(2, '0')}`;
-                            const isSelected = selectedDates.has(dateStr);
-                            calendarHTML += `<td class="date-cell next-month-preview ${isPastDate ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" data-date="${dateStr}">${nextMonthDate}</td>`;
-                            date++;
-
-                        }
-                        // --- Current Month's Dates ---
-                        else {
-                            const dateObj = new Date(currentYear, currentMonth, date);
-                            const isPastDate = dateObj < today;
-                            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-                            const isSelected = selectedDates.has(dateStr);
-                            calendarHTML += `<td class="date-cell ${isPastDate ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" data-date="${dateStr}">${date}</td>`;
-                            date++;
-                        }
-
-                    }
-                    calendarHTML += "</tr>";
-                    if (date > lastDateOfMonth && i >= Math.ceil((firstDayOfMonth + lastDateOfMonth) / 7) - 1) {
-                         break;
-                    }
-                }
-
-                calendarHTML += "</tbody></table>";
-                calendarElement.innerHTML = calendarHTML;
-
-                // --- Add Event Listeners AFTER rendering ---
-                const tableBody = calendarElement.querySelector("tbody");
-                if (tableBody) {
-                    tableBody.addEventListener("click", function(event) {
-                        const targetCell = event.target;
-                        if (targetCell.matches("td.date-cell:not(.disabled)")) {
-                            const dateStr = targetCell.dataset.date;
-                            if (selectedDates.has(dateStr)) {
-                                selectedDates.delete(dateStr);
-                                targetCell.classList.remove("selected");
-                            } else {
-                                selectedDates.add(dateStr);
-                                targetCell.classList.add("selected");
-                            }
-                            updateSelectedDatesCount();
-                        }
-                    });
-                }
-
-                const prevBtn = calendarElement.querySelector("#prev-month-btn");
-                const nextBtn = calendarElement.querySelector("#next-month-btn");
-                if (prevBtn) {
-                    prevBtn.addEventListener("click", prevMonth);
-                }
-                if (nextBtn) {
-                    nextBtn.addEventListener("click", nextMonth);
-                }
-            }
-
-            // --- Initialize ---
-            populateTimeOptions();
-            renderCalendar(); // Initial calendar render
-
-            // --- Confirm Button Action ---
-            document.getElementById("confirm-btn").addEventListener("click", function() {
-                const timetableName = document.getElementById("timetable-name").value.trim();
-                const startTime = document.getElementById("available-time").value;
-                const endTime = document.getElementById("end-time").value;
-                const selectedDatesArray = Array.from(selectedDates);
-
-                // --- Input Validation ---
-                if (!timetableName) {
-                    alert("Please enter a timetable name.");
-                    return;
-                }
-                 if (!startTime || !endTime) {
-                    alert("Please select both start and end times.");
-                    return;
-                }
-                if (selectedDatesArray.length === 0) {
-                    alert("Please select at least one date.");
-                    return;
-                }
-
-                const startHour = parseInt(startTime.split(':')[0]);
-                const endHour = parseInt(endTime.split(':')[0]);
-                if (startHour >= endHour) {
-                    alert("Start time must be earlier than end time.");
-                    return;
-                }
-
-                // --- Save Data and Redirect ---
+            // *** Check local storage for login info ***
+            const localUserString = localStorage.getItem('timepick_user');
+            let localUser = null;
+            if (localUserString) {
                 try {
-                    localStorage.setItem('schedule_data', JSON.stringify({
-                        timetableName,
-                        startTime,
-                        endTime,
-                        selectedDates: selectedDatesArray.sort()
-                    }));
-                    console.log("Data saved to localStorage:", localStorage.getItem('schedule_data'));
-
-                    // *** MODIFIED LINE: Redirect to newthird.html ***
-                    window.location.href = 'newthird.html';
-                    console.log("Attempting redirect to newthird.html...");
-
-                } catch (error) {
-                    console.error("Error saving data to localStorage or redirecting:", error);
-                    alert("An error occurred while saving your schedule. Please try again.");
+                    localUser = JSON.parse(localUserString);
+                    // Simple validation for local user object (at least has username)
+                    if (!localUser || !localUser.username) {
+                        console.log("Invalid local user data found, removing.");
+                        localStorage.removeItem('timepick_user');
+                        localUser = null; // Set to null
+                    } else {
+                         console.log("Found valid local user session:", localUser);
+                    }
+                } catch (e) {
+                    console.error("Error parsing local user session:", e);
+                    localStorage.removeItem('timepick_user'); // Clear invalid data
                 }
-            });
+            }
+            // *** Check finished ***
+
+            if (user) {
+                // --- Firebase user is logged in ---
+                console.log("Firebase user authenticated. Initializing page.");
+                // Optionally clear local login info if Firebase login exists
+                // localStorage.removeItem('timepick_user');
+                initializePage(user); // Pass Firebase user object
+                updateUserIcon(user); // Update icon for Firebase user
+
+            } else if (localUser) {
+                // --- No Firebase login, but local login info exists ---
+                console.log("Local user session found. Initializing page.");
+                initializePage(null); // No Firebase user object
+                updateUserIcon(null, localUser); // Update icon for local user
+
+            } else {
+                // --- Neither Firebase nor local login info exists ---
+                console.log("No authenticated user (Firebase or local) found on choose.html, redirecting to index.html.");
+                window.location.href = "index.html"; // Redirect to index page
+            }
         });
+
+        // --- Update User Icon Function (New/Modified) ---
+        function updateUserIcon(firebaseUser, localUser = null) {
+            if (!userIconElement) return; // Return if element doesn't exist
+
+            if (firebaseUser) {
+                // Display Firebase user icon
+                userIconElement.src = firebaseUser.photoURL || './default-avatar.png';
+                userIconElement.alt = firebaseUser.displayName || 'User Avatar';
+                userIconElement.title = `Logged in as ${firebaseUser.displayName || firebaseUser.email}\nClick to logout (Google)`;
+                userIconElement.onclick = () => logoutFirebase(); // Bind Firebase logout
+            } else if (localUser) {
+                // Display default icon and name for local user
+                userIconElement.src = './default-avatar.png'; // Local users use default avatar
+                userIconElement.alt = localUser.username;
+                userIconElement.title = `Logged in as ${localUser.username}\nClick to logout (Local)`;
+                userIconElement.onclick = () => logoutLocal(); // Bind local logout
+            } else {
+                 // Should not happen, but as a fallback
+                 userIconElement.style.display = 'none';
+            }
+        }
+
+
+        // --- Logout Function (Firebase) ---
+        function logoutFirebase() {
+            signOut(auth).then(() => {
+                console.log("Firebase user signed out successfully.");
+                // onAuthStateChanged will automatically detect the change and trigger redirect
+            }).catch((error) => {
+                console.error("Error signing out Firebase user:", error);
+                alert("Error signing out. Please try again.");
+            });
+        }
+
+        // --- Logout Function (Local) (New) ---
+        function logoutLocal() {
+            console.log("Logging out local user.");
+            localStorage.removeItem('timepick_user');
+            // Manually redirect to index page after clearing local storage
+            window.location.href = "index.html";
+        }
+
+
+        // --- Page Initialization (Modified: accepts user parameter) ---
+        function initializePage(authenticatedUser) { // Parameter can be firebase user or null
+            console.log("Initializing choose.html content...");
+            // You could add specific UI adjustments based on authenticatedUser here if needed
+            // e.g., display different welcome messages
+
+            populateTimeOptions();
+            renderCalendar();
+            setupEventListeners();
+        }
+
+        // --- Populate Time Select Options --- (Unchanged)
+        function populateTimeOptions() {
+            const timeOptions = [];
+            for (let i = 0; i < 24; i++) {
+                const hour = String(i).padStart(2, '0');
+                const time = `${hour}:00`;
+                timeOptions.push(`<option value="${time}">${time}</option>`);
+            }
+            const optionsHTML = timeOptions.join('');
+            startTimeSelect.innerHTML = optionsHTML;
+            endTimeSelect.innerHTML = optionsHTML;
+            // Set a default reasonable range if needed, e.g., 9:00 to 17:00
+            startTimeSelect.value = "09:00";
+            endTimeSelect.value = "17:00";
+        }
+
+        // --- Calendar Rendering Logic --- (Unchanged)
+        function renderCalendar() {
+            const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay(); // 0 (Sun) - 6 (Sat)
+            const lastDateOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const lastDayOfPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+            let calendarHTML = `
+                <div class="calendar-header">
+                    <button id="prev-month-btn" aria-label="Previous month">◀</button>
+                    <span>${new Date(currentYear, currentMonth).toLocaleString('en-US', { month: 'long', year: 'numeric' })}</span>
+                    <button id="next-month-btn" aria-label="Next month">▶</button>
+                </div>
+                <table class="calendar-table">
+                    <thead>
+                        <tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>
+                    </thead>
+                    <tbody>`;
+
+            let date = 1;
+            let prevMonthDate = lastDayOfPrevMonth - firstDayOfMonth + 1;
+
+            for (let i = 0; i < 6; i++) {
+                calendarHTML += "<tr>";
+                for (let j = 0; j < 7; j++) {
+                    let cellClasses = "date-cell";
+                    let dateStr = "";
+                    let cellContent = "";
+                    let isDisabled = false;
+
+                    if (i === 0 && j < firstDayOfMonth) {
+                        // Previous month's dates
+                        cellClasses += " not-current-month";
+                        const prevMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+                        const prevMonthIndex = currentMonth === 0 ? 11 : currentMonth - 1;
+                        dateStr = `${prevMonthYear}-${String(prevMonthIndex + 1).padStart(2, '0')}-${String(prevMonthDate).padStart(2, '0')}`;
+                        cellContent = prevMonthDate;
+                        // Optionally disable past dates from previous month
+                        isDisabled = new Date(prevMonthYear, prevMonthIndex, prevMonthDate) < today;
+                        prevMonthDate++;
+                    } else if (date > lastDateOfMonth) {
+                        // Next month's dates
+                        cellClasses += " next-month-preview";
+                        const nextMonthDate = date - lastDateOfMonth;
+                        const nextMonthYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+                        const nextMonthIndex = currentMonth === 11 ? 0 : currentMonth + 1;
+                        dateStr = `${nextMonthYear}-${String(nextMonthIndex + 1).padStart(2, '0')}-${String(nextMonthDate).padStart(2, '0')}`;
+                        cellContent = nextMonthDate;
+                        isDisabled = new Date(nextMonthYear, nextMonthIndex, nextMonthDate) < today;
+                        date++;
+                    } else {
+                        // Current month's dates
+                        dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+                        cellContent = date;
+                        isDisabled = new Date(currentYear, currentMonth, date) < today;
+                        date++;
+                    }
+
+                    if (isDisabled) {
+                        cellClasses += " disabled";
+                    }
+                    if (selectedDates.has(dateStr)) {
+                        cellClasses += " selected";
+                    }
+
+                    calendarHTML += `<td class="${cellClasses}" data-date="${dateStr}">${cellContent}</td>`;
+                }
+                calendarHTML += "</tr>";
+                // Stop rendering rows if we've passed the last date and filled the necessary rows
+                if (date > lastDateOfMonth && i >= Math.ceil((firstDayOfMonth + lastDateOfMonth) / 7) - 1) {
+                    break;
+                }
+            }
+
+            calendarHTML += "</tbody></table>";
+            calendarElement.innerHTML = calendarHTML;
+
+            // Re-attach month navigation listeners after rendering
+            const prevBtn = calendarElement.querySelector("#prev-month-btn");
+            const nextBtn = calendarElement.querySelector("#next-month-btn");
+            if (prevBtn) prevBtn.addEventListener("click", prevMonth);
+            if (nextBtn) nextBtn.addEventListener("click", nextMonth);
+        }
+
+        // --- Calendar Interaction --- (Unchanged)
+        function handleDateClick(event) {
+            const targetCell = event.target;
+            if (targetCell.matches("td.date-cell:not(.disabled)")) {
+                const dateStr = targetCell.dataset.date;
+                if (selectedDates.has(dateStr)) {
+                    selectedDates.delete(dateStr);
+                    targetCell.classList.remove("selected");
+                } else {
+                    selectedDates.add(dateStr);
+                    targetCell.classList.add("selected");
+                }
+                updateSelectedDatesCount();
+                // Clear date error on interaction
+                dateErrorElement.textContent = '';
+            }
+        }
+
+        function updateSelectedDatesCount() {
+            selectedDatesInfoElement.textContent = `Selected dates: ${selectedDates.size}`;
+        }
+
+        function prevMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        // --- Input Validation --- (Unchanged)
+        function validateInputs() {
+            let isValid = true;
+            timeErrorElement.textContent = ''; // Clear previous errors
+            dateErrorElement.textContent = '';
+            timetableNameInput.classList.remove('is-invalid');
+            startTimeSelect.classList.remove('is-invalid');
+            endTimeSelect.classList.remove('is-invalid');
+
+            if (!timetableNameInput.value.trim()) {
+                timetableNameInput.classList.add('is-invalid');
+                isValid = false;
+            }
+            if (!startTimeSelect.value) {
+                 startTimeSelect.classList.add('is-invalid');
+                 isValid = false;
+            }
+             if (!endTimeSelect.value) {
+                 endTimeSelect.classList.add('is-invalid');
+                 isValid = false;
+            }
+
+            // Validate time range
+            const startHour = parseInt(startTimeSelect.value.split(':')[0]);
+            const endHour = parseInt(endTimeSelect.value.split(':')[0]);
+            if (startHour >= endHour) {
+                timeErrorElement.textContent = "Start time must be earlier than end time.";
+                startTimeSelect.classList.add('is-invalid');
+                endTimeSelect.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            // Validate date selection
+            if (selectedDates.size === 0) {
+                dateErrorElement.textContent = "Please select at least one date.";
+                // Optionally add a visual indicator to the calendar container
+                // calendarElement.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // --- Confirm Action --- (Unchanged)
+        function confirmSchedule() {
+            console.log("Confirm button clicked.");
+            if (!validateInputs()) {
+                console.log("Validation failed.");
+                return; // Stop if validation fails
+            }
+
+            console.log("Validation passed.");
+            confirmBtn.disabled = true; // Disable button to prevent multiple clicks
+            confirmBtn.textContent = "Saving...";
+
+            const scheduleData = {
+                timetableName: timetableNameInput.value.trim(),
+                startTime: startTimeSelect.value,
+                endTime: endTimeSelect.value,
+                selectedDates: Array.from(selectedDates).sort() // Sort dates for consistency
+            };
+
+            try {
+                localStorage.setItem('schedule_data', JSON.stringify(scheduleData));
+                console.log("Data saved to localStorage:", scheduleData);
+                console.log("Redirecting to newthird.html...");
+                window.location.href = 'newthird.html'; // Redirect to the next page
+            } catch (error) {
+                console.error("Error saving data to localStorage or redirecting:", error);
+                alert("An error occurred while saving your schedule. Please check console for details.");
+                confirmBtn.disabled = false; // Re-enable button on error
+                confirmBtn.textContent = "Confirm and Proceed";
+            }
+        }
+
+        // --- Setup Event Listeners --- (Unchanged)
+        function setupEventListeners() {
+             // Use event delegation for calendar clicks for better performance
+            calendarElement.addEventListener('click', handleDateClick);
+            confirmBtn.addEventListener('click', confirmSchedule);
+
+            // Add listeners to clear time error on change
+            startTimeSelect.addEventListener('change', () => { timeErrorElement.textContent = ''; startTimeSelect.classList.remove('is-invalid'); endTimeSelect.classList.remove('is-invalid'); });
+            endTimeSelect.addEventListener('change', () => { timeErrorElement.textContent = ''; startTimeSelect.classList.remove('is-invalid'); endTimeSelect.classList.remove('is-invalid'); });
+            timetableNameInput.addEventListener('input', () => { timetableNameInput.classList.remove('is-invalid'); });
+        }
+
+        // No need to wrap in DOMContentLoaded because the script is type="module"
+        // and placed at the end of the body, but the auth check handles initialization timing.
+
     </script>
 </body>
 </html>
