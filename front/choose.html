@@ -3,78 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Schedule - TimePick</title>
+    <title>TimePick</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Firebase CDN 版 (modular v9)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+        const firebaseConfig = {
+        apiKey: "AIzaSyCq7lE6EK9hmCd8SDSTbvAZxrozVGXQZpo",
+        authDomain: "timepick-for-test.firebaseapp.com",
+        projectId: "timepick-for-test",
+        storageBucket: "timepick-for-test.firebasestorage.app",
+        messagingSenderId: "14150496366",
+        appId: "1:14150496366:web:45cbdc5752a3dc1e43f67f",
+        measurementId: "G-51J471CXLQ"
+        };
+
+        // 初始化 Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // 監聽登入狀態
+        onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // 登入中
+            const photoURL = user.photoURL;
+            const userIcon = document.getElementById('user-icon');
+            if (photoURL) {
+            userIcon.src = photoURL;
+            } else {
+            userIcon.src = 'default_icon.png'; // 預設大頭貼（你可以自己放一個）
+            }
+        } else {
+            // 沒登入，跳回login.html
+            window.location.href = "login.html";
+        }
+        });
+
+        // 登出功能（如果你想加）
+        function logout() {
+        signOut(auth).then(() => {
+            window.location.href = "login.html";
+        });
+        }
+
+        window.logout = logout;
+    </script>
 
     <style>
-        /* --- General Styles --- */
+        /* 簡單讓頭像在右上角 */
+        #user-container {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        }
+        #user-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        }
+    </style>
+
+    <!-- Custom CSS -->
+    <style>
         body {
             min-height: 100vh;
             background-color: #f8f9fa;
-            padding-top: 70px; /* Increased padding to avoid overlap with fixed user icon */
-            padding-bottom: 20px;
+            padding-top: 40px;
             font-family: Arial, sans-serif;
-            position: relative; /* Needed for absolute positioning of user icon */
         }
         h1 {
             font-size: 36px;
             font-weight: bold;
             color: #67AD5B;
-            margin-bottom: 30px; /* Increased margin */
+            margin-bottom: 20px;
         }
         .container {
             max-width: 700px;
             background-color: white;
-            padding: 30px; /* Increased padding */
+            padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .section-title {
+        .input-group label, .time-select label, .date-label {
             font-weight: bold;
-            margin-bottom: 15px; /* Increased margin */
-            color: #343a40;
-            display: block; /* Ensure it takes full width */
+            margin-right: 10px;
         }
         .form-label {
             margin-bottom: 5px;
-            font-weight: 500; /* Slightly less bold than section title */
         }
-
-        /* --- User Icon --- */
-        #user-container {
-            position: absolute; /* Changed to absolute relative to body */
-            top: 15px;
-            right: 20px;
-            z-index: 1050; /* Ensure it's above most elements */
-        }
-        #user-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 1px solid #ddd;
-            object-fit: cover;
-            background-color: #eee; /* Placeholder background */
-        }
-
-        /* --- Calendar Styles --- */
         .calendar-container {
             border: 1px solid #ddd;
-            padding: 15px; /* Increased padding */
+            padding: 10px;
             border-radius: 5px;
             width: 100%;
-            max-width: 380px; /* Adjusted width */
-            margin-bottom: 15px; /* Adjusted margin */
+            /* 調整月曆寬度以適應內容 */
+            max-width: 350px; /* 稍微加寬 */
+            margin-bottom: 20px;
         }
         .calendar-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-weight: bold;
-            font-size: 1rem; /* Adjusted font size */
-            margin-bottom: 15px; /* Increased margin */
+            font-size: 14px; /* 可稍微加大 */
+            margin-bottom: 10px;
         }
         .calendar-header button {
             background: none;
@@ -82,508 +121,338 @@
             cursor: pointer;
             color: #67AD5B;
             font-weight: bold;
-            font-size: 1.4em; /* Adjusted size */
-            padding: 0 5px; /* Added padding for easier clicking */
+            font-size: 1.2em; /* 讓按鈕更明顯 */
         }
         .calendar-table {
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
         }
-        .calendar-table th,
-        .calendar-table td {
-            height: 45px; /* Increased height */
+        .calendar-table th, .calendar-table td {
+            /* width: 40px; */ /* 移除固定寬度，讓其自適應 */
+            height: 40px;
             text-align: center;
-            border: 1px solid #eee; /* Lighter border */
-            font-size: 0.85rem; /* Adjusted font size */
+            border: 1px solid #ddd;
+            font-size: 12px;
             cursor: pointer;
-            padding: 5px;
-            vertical-align: middle; /* Center content vertically */
+            padding: 5px; /* 增加內邊距 */
         }
         .calendar-table th {
-             font-weight: bold;
-             background-color: #f8f9fa;
-             color: #6c757d; /* Grayish text for headers */
-             cursor: default;
+             font-weight: bold; /* 加粗星期標題 */
+             background-color: #f8f9fa; /* 淺灰色背景 */
         }
-        .calendar-table td:not(.disabled):not(.not-current-month):hover {
+        .calendar-table td:hover:not(.disabled):not(.not-current-month) {
             background-color: #e9ecef;
         }
-        .calendar-table td.date-cell {
-            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out; /* Smooth transition */
-        }
-        /* Disabled (Past) Dates */
+        /* 使用 CSS 控制不可點擊 */
         .calendar-table td.disabled {
-            background-color: #f8f9fa !important;
-            color: #ced4da !important; /* Lighter gray */
+            background-color: #f8f9fa;
+            color: #ccc;
+            cursor: not-allowed;
+            pointer-events: none; /* CSS 控制不可點擊 */
+        }
+        .calendar-table td.next-month-preview {
+            color: #aaa; /* 使用稍淺的灰色文字以區分 */
+            cursor: pointer; /* 確保鼠標是可點擊樣式 */
+        }
+        .calendar-table td.next-month-preview:hover:not(.disabled) {
+            background-color: #e9ecef; /* 與當前月份日期使用相同的 hover 背景色 */
+        }
+        /* 這個 class 用於上個月的日期 */
+        .calendar-table td.not-current-month {
+            background-color: #f8f9fa; /* 淺灰色背景 */
+            color: #ccc; /* 淺灰色文字 */
+            /*cursor: not-allowed; /* 不允許的鼠標樣式 */
+            /*pointer-events: none; /* 阻止點擊事件 */
+        }
+        .calendar-table td.not-current-month:hover:not(.disabled) {
+            background-color: #e9ecef; /* 與其他日期使用相同的 hover 背景色 */
+        }
+        .calendar-table td.disabled {
+            background-color: #f8f9fa !important; /* 使用 !important 確保覆蓋其他背景 */
+            color: #ccc !important; /* 使用 !important 確保覆蓋其他顏色 */
             cursor: not-allowed;
             pointer-events: none;
         }
-        /* Other Month Dates (Preview) */
-        .calendar-table td.not-current-month,
-        .calendar-table td.next-month-preview {
-            color: #adb5bd; /* Slightly darker gray for visibility */
-        }
-        .calendar-table td.not-current-month:not(.disabled):hover,
-        .calendar-table td.next-month-preview:not(.disabled):hover {
-             background-color: #e9ecef;
-        }
-        /* Selected Dates */
-        .calendar-table td.selected {
+        .selected {
             background-color: #67AD5B !important;
-            color: white !important;
-            font-weight: bold;
+            color: white !important; /* 確保文字顏色是白色 */
         }
-
-        /* --- Selected Dates Info --- */
-        .selected-dates-info {
-            font-size: 0.9rem; /* Adjusted size */
-            color: #495057; /* Darker gray */
-            margin-top: 10px;
-        }
-
-        /* --- Confirm Button --- */
         .confirm-btn {
             background-color: #67AD5B;
             border: none;
-            padding: 12px 25px; /* Increased padding */
-            font-size: 1rem; /* Adjusted size */
+            padding: 10px 20px;
+            font-size: 16px;
             border-radius: 5px;
-            color: white;
-            transition: background-color 0.2s ease; /* Smooth transition */
+            color: white; /* 確保按鈕文字是白色 */
         }
         .confirm-btn:hover {
             background-color: #558C4A;
         }
-        .confirm-btn:disabled {
-             background-color: #a5d6a7; /* Lighter green when disabled */
-             cursor: not-allowed;
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #343a40;
+        }
+        .selected-dates-info {
+            font-size: 14px;
+            color: #343a40;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
-    <!-- User Icon Container -->
-    <div id="user-container">
-        <img id="user-icon" src="./default-avatar.png" alt="User Avatar" title="Click to logout"> <!-- Default image, title for tooltip -->
-    </div>
-
     <h1 class="text-center">TIMEPICK</h1>
-
     <div class="container">
         <!-- Timetable Name -->
         <div class="mb-4">
             <label for="timetable-name" class="form-label section-title">1. Timetable Name:</label>
-            <input type="text" id="timetable-name" class="form-control" placeholder="e.g., Project Meeting, Study Group" required>
-             <div class="invalid-feedback">Please enter a name for your timetable.</div>
+            <input type="text" id="timetable-name" class="form-control" placeholder="Enter name">
         </div>
 
         <!-- Available Time -->
         <div class="mb-4">
-            <span class="section-title">2. Select Available Time Range:</span>
+            <span class="section-title">2. Select Available Time:</span>
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label for="start-time" class="form-label">From:</label>
-                    <select id="start-time" class="form-select" required></select>
-                    <div class="invalid-feedback">Please select a start time.</div>
+                    <label for="available-time" class="form-label">From:</label>
+                    <select id="available-time" class="form-select"></select>
                 </div>
                 <div class="col-md-6">
                     <label for="end-time" class="form-label">To:</label>
-                    <select id="end-time" class="form-select" required></select>
-                    <div class="invalid-feedback">Please select an end time.</div>
+                    <select id="end-time" class="form-select"></select>
                 </div>
             </div>
-            <div id="time-error" class="invalid-feedback d-block mt-2"></div> <!-- Placeholder for time range error -->
         </div>
 
         <!-- Date Selection -->
         <div class="mb-4">
-            <span class="section-title">3. Select Available Dates:</span>
+            <span class="section-title">3. Select Dates:</span>
             <div class="row g-3">
-                <div class="col-md-12 d-flex justify-content-center">
-                    <div>
-                        <div class="calendar-container" id="calendar">
-                            <!-- Calendar will be rendered here by JS -->
-                            <div class="text-center p-5">Loading Calendar...</div>
-                        </div>
-                        <div class="selected-dates-info text-center" id="selected-dates-info">Selected dates: 0</div>
-                        <div id="date-error" class="invalid-feedback d-block text-center mt-2"></div> <!-- Placeholder for date selection error -->
+                <div class="col-md-12 d-flex justify-content-center"> <!-- 將月曆置中 -->
+                    <div> <!-- 包裹月曆和計數器 -->
+                        <div class="calendar-container" id="calendar"></div>
+                        <div class="selected-dates-info text-center" id="selected-dates-info">Selected dates: 0</div> <!-- 計數器也置中 -->
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Confirm Button -->
-        <div class="text-center mt-4"> <!-- Added margin top -->
-            <button id="confirm-btn" class="btn confirm-btn">Confirm and Proceed</button>
+        <div class="text-center"> <!-- 將按鈕置中 -->
+            <button id="confirm-btn" class="btn confirm-btn">Confirm</button>
         </div>
     </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
-    <!-- Firebase and Custom JavaScript -->
-    <script type="module">
-        // --- Firebase Initialization and Auth ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+     <!-- 使用者頭像容器 -->
+    <div id="user-container">
+        <img id="user-icon" src="default_icon.png" alt="User Icon" onclick="logout()">
+    </div>
 
-        // Firebase config (保持不變)
-        const firebaseConfig = {
-            apiKey: "AIzaSyCq7lE6EK9hmCd8SDSTbvAZxrozVGXQZpo",
-            authDomain: "timepick-for-test.firebaseapp.com",
-            projectId: "timepick-for-test",
-            storageBucket: "timepick-for-test.appspot.com",
-            messagingSenderId: "14150496366",
-            appId: "1:14150496366:web:45cbdc5752a3dc1e43f67f"
-        };
+    <!-- Custom JavaScript -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // --- Populate Time Options ---
+            function populateTimeOptions() {
+                const timeOptions = [];
+                for (let i = 0; i < 24; i++) {
+                    let time = i.toString().padStart(2, '0') + ":00";
+                    timeOptions.push(`<option value="${time}">${time}</option>`);
+                }
+                document.getElementById("available-time").innerHTML = timeOptions.join('');
+                document.getElementById("end-time").innerHTML = timeOptions.join('');
+            }
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+            // --- Calendar Logic ---
+            let currentYear = new Date().getFullYear();
+            let currentMonth = new Date().getMonth(); // 0-11
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Set time to midnight for accurate date comparison
+            let selectedDates = new Set(); // Store selected dates (YYYY-MM-DD format) globally
 
-        // --- DOM Elements ---
-        const userIconElement = document.getElementById('user-icon');
-        // ... (其他 DOM 元素獲取保持不變)
-        const timetableNameInput = document.getElementById('timetable-name');
-        const startTimeSelect = document.getElementById('start-time');
-        const endTimeSelect = document.getElementById('end-time');
-        const calendarElement = document.getElementById('calendar');
-        const selectedDatesInfoElement = document.getElementById('selected-dates-info');
-        const confirmBtn = document.getElementById('confirm-btn');
-        const timeErrorElement = document.getElementById('time-error');
-        const dateErrorElement = document.getElementById('date-error');
+            // Cache DOM elements for performance
+            const calendarElement = document.getElementById("calendar");
+            const selectedDatesInfoElement = document.getElementById("selected-dates-info");
 
+            // --- Month Navigation Functions ---
+            function prevMonth() {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                renderCalendar();
+            }
 
-        // --- Global State --- (保持不變)
-        let currentYear = new Date().getFullYear();
-        let currentMonth = new Date().getMonth();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        let selectedDates = new Set();
+            function nextMonth() {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                renderCalendar();
+            }
 
-        // --- Authentication Guard (修改後) ---
-        onAuthStateChanged(auth, (user) => {
-            console.log("Auth state checked on choose.html. Firebase User:", user ? user.uid : 'None');
+            // --- Update Selected Dates Count Display ---
+            function updateSelectedDatesCount() {
+                const selectedCount = selectedDates.size;
+                selectedDatesInfoElement.textContent = `Selected dates: ${selectedCount}`;
+            }
 
-            // *** 新增：檢查本地存儲的登入資訊 ***
-            const localUserString = localStorage.getItem('timepick_user');
-            let localUser = null;
-            if (localUserString) {
-                try {
-                    localUser = JSON.parse(localUserString);
-                    // 簡單驗證本地用戶物件是否有效 (至少要有 username)
-                    if (!localUser || !localUser.username) {
-                        console.log("Invalid local user data found, removing.");
-                        localStorage.removeItem('timepick_user');
-                        localUser = null; // 設為 null
-                    } else {
-                         console.log("Found valid local user session:", localUser);
+            // --- Render Calendar Function ---
+            function renderCalendar() {
+                const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay(); // 0 (Sun) - 6 (Sat)
+                const lastDateOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                const lastDayOfPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+                // --- Calendar Header ---
+                let calendarHTML = `
+                    <div class="calendar-header">
+                        <button id="prev-month-btn">◀</button>
+                        <span>${new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' })} ${currentYear}</span>
+                        <button id="next-month-btn">▶</button>
+                    </div>
+                    <table class="calendar-table">
+                        <thead>
+                            <tr>
+                                <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+                let date = 1;
+                let prevMonthDate = lastDayOfPrevMonth - firstDayOfMonth + 1;
+
+                // --- Calendar Body (Weeks and Days) ---
+                for (let i = 0; i < 6; i++) { // Max 6 rows needed for a month
+                    calendarHTML += "<tr>";
+                    for (let j = 0; j < 7; j++) { // 7 days a week
+                        // --- Previous Month's Dates ---
+                        if (i === 0 && j < firstDayOfMonth) {
+                            const prevMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+                            const prevMonthIndex = currentMonth === 0 ? 11 : currentMonth - 1;
+                            const dateStr = `${prevMonthYear}-${String(prevMonthIndex + 1).padStart(2, '0')}-${String(prevMonthDate).padStart(2, '0')}`;
+                            const isSelected = selectedDates.has(dateStr);
+                            calendarHTML += `<td class="date-cell not-current-month ${isSelected ? 'selected' : ''}" data-date="${dateStr}">${prevMonthDate}</td>`;
+                            prevMonthDate++;
+                        }
+                        // --- Next Month's Dates ---
+                        else if (date > lastDateOfMonth) {
+                            const nextMonthDate = date - lastDateOfMonth;
+                            const nextMonthYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+                            const nextMonthIndex = currentMonth === 11 ? 0 : currentMonth + 1;
+                            const dateObj = new Date(nextMonthYear, nextMonthIndex, nextMonthDate);
+                            const isPastDate = dateObj < today;
+                            const dateStr = `${nextMonthYear}-${String(nextMonthIndex + 1).padStart(2, '0')}-${String(nextMonthDate).padStart(2, '0')}`;
+                            const isSelected = selectedDates.has(dateStr);
+                            calendarHTML += `<td class="date-cell next-month-preview ${isPastDate ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" data-date="${dateStr}">${nextMonthDate}</td>`;
+                            date++;
+
+                        }
+                        // --- Current Month's Dates ---
+                        else {
+                            const dateObj = new Date(currentYear, currentMonth, date);
+                            const isPastDate = dateObj < today;
+                            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+                            const isSelected = selectedDates.has(dateStr);
+                            calendarHTML += `<td class="date-cell ${isPastDate ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" data-date="${dateStr}">${date}</td>`;
+                            date++;
+                        }
+
                     }
-                } catch (e) {
-                    console.error("Error parsing local user session:", e);
-                    localStorage.removeItem('timepick_user'); // 清除無效數據
+                    calendarHTML += "</tr>";
+                    if (date > lastDateOfMonth && i >= Math.ceil((firstDayOfMonth + lastDateOfMonth) / 7) - 1) {
+                         break;
+                    }
+                }
+
+                calendarHTML += "</tbody></table>";
+                calendarElement.innerHTML = calendarHTML;
+
+                // --- Add Event Listeners AFTER rendering ---
+                const tableBody = calendarElement.querySelector("tbody");
+                if (tableBody) {
+                    tableBody.addEventListener("click", function(event) {
+                        const targetCell = event.target;
+                        if (targetCell.matches("td.date-cell:not(.disabled)")) {
+                            const dateStr = targetCell.dataset.date;
+                            if (selectedDates.has(dateStr)) {
+                                selectedDates.delete(dateStr);
+                                targetCell.classList.remove("selected");
+                            } else {
+                                selectedDates.add(dateStr);
+                                targetCell.classList.add("selected");
+                            }
+                            updateSelectedDatesCount();
+                        }
+                    });
+                }
+
+                const prevBtn = calendarElement.querySelector("#prev-month-btn");
+                const nextBtn = calendarElement.querySelector("#next-month-btn");
+                if (prevBtn) {
+                    prevBtn.addEventListener("click", prevMonth);
+                }
+                if (nextBtn) {
+                    nextBtn.addEventListener("click", nextMonth);
                 }
             }
-            // *** 檢查結束 ***
 
-            if (user) {
-                // --- Firebase 使用者已登入 ---
-                console.log("Firebase user authenticated. Initializing page.");
-                // 如果 Firebase 登入，可以選擇性地清除本地登入資訊
-                // localStorage.removeItem('timepick_user');
-                initializePage(user); // 傳遞 Firebase user 物件
-                updateUserIcon(user); // 更新頭像為 Firebase 用戶
-
-            } else if (localUser) {
-                // --- 沒有 Firebase 登入，但有本地登入資訊 ---
-                console.log("Local user session found. Initializing page.");
-                initializePage(null); // 沒有 Firebase user 物件
-                updateUserIcon(null, localUser); // 更新頭像為本地用戶
-
-            } else {
-                // --- Firebase 未登入，也沒有本地登入資訊 ---
-                console.log("No authenticated user (Firebase or local) found on choose.html, redirecting to index.html.");
-                window.location.href = "index.html"; // 重定向到 index 頁面
-            }
-        });
-
-        // --- 更新使用者頭像函數 (新增/修改) ---
-        function updateUserIcon(firebaseUser, localUser = null) {
-            if (!userIconElement) return; // 如果元素不存在則返回
-
-            if (firebaseUser) {
-                // 顯示 Firebase 用戶頭像
-                userIconElement.src = firebaseUser.photoURL || './default-avatar.png';
-                userIconElement.alt = firebaseUser.displayName || 'User Avatar';
-                userIconElement.title = `Logged in as ${firebaseUser.displayName || firebaseUser.email}\nClick to logout (Google)`;
-                userIconElement.onclick = () => logoutFirebase(); // 綁定 Firebase 登出
-            } else if (localUser) {
-                // 顯示本地用戶的預設頭像和名稱
-                userIconElement.src = './default-avatar.png'; // 本地用戶使用預設頭像
-                userIconElement.alt = localUser.username;
-                userIconElement.title = `Logged in as ${localUser.username}\nClick to logout (Local)`;
-                userIconElement.onclick = () => logoutLocal(); // 綁定本地登出
-            } else {
-                 // 理論上不應該到達這裡，但作為防禦
-                 userIconElement.style.display = 'none';
-            }
-        }
-
-
-        // --- Logout Function (Firebase) ---
-        function logoutFirebase() {
-            signOut(auth).then(() => {
-                console.log("Firebase user signed out successfully.");
-                // onAuthStateChanged 會自動檢測到變化並觸發重定向
-            }).catch((error) => {
-                console.error("Error signing out Firebase user:", error);
-                alert("Error signing out. Please try again.");
-            });
-        }
-
-        // --- Logout Function (Local) (新增) ---
-        function logoutLocal() {
-            console.log("Logging out local user.");
-            localStorage.removeItem('timepick_user');
-            // 清除本地存儲後，手動重定向到 index 頁面
-            window.location.href = "index.html";
-        }
-
-
-        // --- Page Initialization (修改：接受 user 參數) ---
-        function initializePage(authenticatedUser) { // 參數可以是 firebase user 或 null
-            console.log("Initializing choose.html content...");
-            // 這裡可以根據 authenticatedUser 是否存在來做一些特定的 UI 調整 (如果需要)
-            // 例如：顯示不同的歡迎訊息
-
+            // --- Initialize ---
             populateTimeOptions();
-            renderCalendar();
-            setupEventListeners();
-        }
+            renderCalendar(); // Initial calendar render
 
-        // --- Populate Time Select Options --- (保持不變)
-        function populateTimeOptions() {
-            // ... (程式碼不變)
-            const timeOptions = [];
-            for (let i = 0; i < 24; i++) {
-                const hour = String(i).padStart(2, '0');
-                const time = `${hour}:00`;
-                timeOptions.push(`<option value="${time}">${time}</option>`);
-            }
-            const optionsHTML = timeOptions.join('');
-            startTimeSelect.innerHTML = optionsHTML;
-            endTimeSelect.innerHTML = optionsHTML;
-            startTimeSelect.value = "09:00";
-            endTimeSelect.value = "17:00";
-        }
+            // --- Confirm Button Action ---
+            document.getElementById("confirm-btn").addEventListener("click", function() {
+                const timetableName = document.getElementById("timetable-name").value.trim();
+                const startTime = document.getElementById("available-time").value;
+                const endTime = document.getElementById("end-time").value;
+                const selectedDatesArray = Array.from(selectedDates);
 
-        // --- Calendar Rendering Logic --- (保持不變)
-        function renderCalendar() {
-            // ... (程式碼不變)
-            const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay(); // 0 (Sun) - 6 (Sat)
-            const lastDateOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            const lastDayOfPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
-
-            let calendarHTML = `
-                <div class="calendar-header">
-                    <button id="prev-month-btn" aria-label="Previous month">◀</button>
-                    <span>${new Date(currentYear, currentMonth).toLocaleString('en-US', { month: 'long', year: 'numeric' })}</span>
-                    <button id="next-month-btn" aria-label="Next month">▶</button>
-                </div>
-                <table class="calendar-table">
-                    <thead>
-                        <tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>
-                    </thead>
-                    <tbody>`;
-
-            let date = 1;
-            let prevMonthDate = lastDayOfPrevMonth - firstDayOfMonth + 1;
-
-            for (let i = 0; i < 6; i++) {
-                calendarHTML += "<tr>";
-                for (let j = 0; j < 7; j++) {
-                    let cellClasses = "date-cell";
-                    let dateStr = "";
-                    let cellContent = "";
-                    let isDisabled = false;
-
-                    if (i === 0 && j < firstDayOfMonth) {
-                        // Previous month's dates
-                        cellClasses += " not-current-month";
-                        const prevMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-                        const prevMonthIndex = currentMonth === 0 ? 11 : currentMonth - 1;
-                        dateStr = `${prevMonthYear}-${String(prevMonthIndex + 1).padStart(2, '0')}-${String(prevMonthDate).padStart(2, '0')}`;
-                        cellContent = prevMonthDate;
-                        isDisabled = new Date(prevMonthYear, prevMonthIndex, prevMonthDate) < today;
-                        prevMonthDate++;
-                    } else if (date > lastDateOfMonth) {
-                        // Next month's dates
-                        cellClasses += " next-month-preview";
-                        const nextMonthDate = date - lastDateOfMonth;
-                        const nextMonthYear = currentMonth === 11 ? currentYear + 1 : currentYear;
-                        const nextMonthIndex = currentMonth === 11 ? 0 : currentMonth + 1;
-                        dateStr = `${nextMonthYear}-${String(nextMonthIndex + 1).padStart(2, '0')}-${String(nextMonthDate).padStart(2, '0')}`;
-                        cellContent = nextMonthDate;
-                        isDisabled = new Date(nextMonthYear, nextMonthIndex, nextMonthDate) < today;
-                        date++;
-                    } else {
-                        // Current month's dates
-                        dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-                        cellContent = date;
-                        isDisabled = new Date(currentYear, currentMonth, date) < today;
-                        date++;
-                    }
-
-                    if (isDisabled) {
-                        cellClasses += " disabled";
-                    }
-                    if (selectedDates.has(dateStr)) {
-                        cellClasses += " selected";
-                    }
-
-                    calendarHTML += `<td class="${cellClasses}" data-date="${dateStr}">${cellContent}</td>`;
+                // --- Input Validation ---
+                if (!timetableName) {
+                    alert("Please enter a timetable name.");
+                    return;
                 }
-                calendarHTML += "</tr>";
-                if (date > lastDateOfMonth && i >= Math.ceil((firstDayOfMonth + lastDateOfMonth) / 7) - 1) {
-                    break;
+                 if (!startTime || !endTime) {
+                    alert("Please select both start and end times.");
+                    return;
                 }
-            }
-
-            calendarHTML += "</tbody></table>";
-            calendarElement.innerHTML = calendarHTML;
-
-            const prevBtn = calendarElement.querySelector("#prev-month-btn");
-            const nextBtn = calendarElement.querySelector("#next-month-btn");
-            if (prevBtn) prevBtn.addEventListener("click", prevMonth);
-            if (nextBtn) nextBtn.addEventListener("click", nextMonth);
-        }
-
-        // --- Calendar Interaction --- (保持不變)
-        function handleDateClick(event) {
-            // ... (程式碼不變)
-            const targetCell = event.target;
-            if (targetCell.matches("td.date-cell:not(.disabled)")) {
-                const dateStr = targetCell.dataset.date;
-                if (selectedDates.has(dateStr)) {
-                    selectedDates.delete(dateStr);
-                    targetCell.classList.remove("selected");
-                } else {
-                    selectedDates.add(dateStr);
-                    targetCell.classList.add("selected");
+                if (selectedDatesArray.length === 0) {
+                    alert("Please select at least one date.");
+                    return;
                 }
-                updateSelectedDatesCount();
-                dateErrorElement.textContent = '';
-            }
-        }
 
-        function updateSelectedDatesCount() {
-            // ... (程式碼不變)
-             selectedDatesInfoElement.textContent = `Selected dates: ${selectedDates.size}`;
-        }
+                const startHour = parseInt(startTime.split(':')[0]);
+                const endHour = parseInt(endTime.split(':')[0]);
+                if (startHour >= endHour) {
+                    alert("Start time must be earlier than end time.");
+                    return;
+                }
 
-        function prevMonth() {
-            // ... (程式碼不變)
-            currentMonth--;
-            if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
-            renderCalendar();
-        }
+                // --- Save Data and Redirect ---
+                try {
+                    localStorage.setItem('schedule_data', JSON.stringify({
+                        timetableName,
+                        startTime,
+                        endTime,
+                        selectedDates: selectedDatesArray.sort()
+                    }));
+                    console.log("Data saved to localStorage:", localStorage.getItem('schedule_data'));
 
-        function nextMonth() {
-            // ... (程式碼不變)
-            currentMonth++;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            }
-            renderCalendar();
-        }
+                    // *** MODIFIED LINE: Redirect to newthird.html ***
+                    window.location.href = 'newthird.html';
+                    console.log("Attempting redirect to newthird.html...");
 
-        // --- Input Validation --- (保持不變)
-        function validateInputs() {
-            // ... (程式碼不變)
-            let isValid = true;
-            timeErrorElement.textContent = '';
-            dateErrorElement.textContent = '';
-            timetableNameInput.classList.remove('is-invalid');
-            startTimeSelect.classList.remove('is-invalid');
-            endTimeSelect.classList.remove('is-invalid');
-
-            if (!timetableNameInput.value.trim()) {
-                timetableNameInput.classList.add('is-invalid');
-                isValid = false;
-            }
-            if (!startTimeSelect.value) {
-                 startTimeSelect.classList.add('is-invalid');
-                 isValid = false;
-            }
-             if (!endTimeSelect.value) {
-                 endTimeSelect.classList.add('is-invalid');
-                 isValid = false;
-            }
-
-            const startHour = parseInt(startTimeSelect.value.split(':')[0]);
-            const endHour = parseInt(endTimeSelect.value.split(':')[0]);
-            if (startHour >= endHour) {
-                timeErrorElement.textContent = "Start time must be earlier than end time.";
-                startTimeSelect.classList.add('is-invalid');
-                endTimeSelect.classList.add('is-invalid');
-                isValid = false;
-            }
-
-            if (selectedDates.size === 0) {
-                dateErrorElement.textContent = "Please select at least one date.";
-                isValid = false;
-            }
-
-            return isValid;
-        }
-
-        // --- Confirm Action --- (保持不變)
-        function confirmSchedule() {
-            // ... (程式碼不變)
-            console.log("Confirm button clicked.");
-            if (!validateInputs()) {
-                console.log("Validation failed.");
-                return;
-            }
-
-            console.log("Validation passed.");
-            confirmBtn.disabled = true;
-            confirmBtn.textContent = "Saving...";
-
-            const scheduleData = {
-                timetableName: timetableNameInput.value.trim(),
-                startTime: startTimeSelect.value,
-                endTime: endTimeSelect.value,
-                selectedDates: Array.from(selectedDates).sort()
-            };
-
-            try {
-                localStorage.setItem('schedule_data', JSON.stringify(scheduleData));
-                console.log("Data saved to localStorage:", scheduleData);
-                console.log("Redirecting to newthird.html...");
-                window.location.href = 'newthird.html';
-            } catch (error) {
-                console.error("Error saving data to localStorage or redirecting:", error);
-                alert("An error occurred while saving your schedule. Please check console for details.");
-                confirmBtn.disabled = false;
-                confirmBtn.textContent = "Confirm and Proceed";
-            }
-        }
-
-        // --- Setup Event Listeners --- (保持不變)
-        function setupEventListeners() {
-            // ... (程式碼不變)
-            calendarElement.addEventListener('click', handleDateClick);
-            confirmBtn.addEventListener('click', confirmSchedule);
-            startTimeSelect.addEventListener('change', () => { timeErrorElement.textContent = ''; startTimeSelect.classList.remove('is-invalid'); endTimeSelect.classList.remove('is-invalid'); });
-            endTimeSelect.addEventListener('change', () => { timeErrorElement.textContent = ''; startTimeSelect.classList.remove('is-invalid'); endTimeSelect.classList.remove('is-invalid'); });
-            timetableNameInput.addEventListener('input', () => { timetableNameInput.classList.remove('is-invalid'); });
-        }
-
+                } catch (error) {
+                    console.error("Error saving data to localStorage or redirecting:", error);
+                    alert("An error occurred while saving your schedule. Please try again.");
+                }
+            });
+        });
     </script>
 </body>
 </html>
-
