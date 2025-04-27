@@ -12,12 +12,13 @@ import {
 
 // Firebase 設定 (保持不變)
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY", // 請替換成你的 API Key
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyCq7lE6EK9hmCd8SDSTbvAZxrozVGXQZpo",
+    authDomain: "timepick-for-test.firebaseapp.com",
+    projectId: "timepick-for-test",
+    storageBucket: "timepick-for-test.firebasestorage.app",
+    messagingSenderId: "14150496366",
+    appId: "1:14150496366:web:45cbdc5752a3dc1e43f67f",
+    measurementId: "G-51J471CXLQ"
 };
 
 // 初始化 Firebase
