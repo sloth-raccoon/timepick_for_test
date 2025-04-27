@@ -87,6 +87,11 @@
         left: 20px;
         font-size: 14px;
     }
+    /* Adjust input group if button is removed */
+    .input-group .form-control {
+        border-top-right-radius: var(--bs-border-radius);
+        border-bottom-right-radius: var(--bs-border-radius);
+    }
   </style>
 </head>
 
@@ -94,10 +99,10 @@
 
   <h1 class="title">TIMEPICK</h1>
 
-  <!-- Google Login Button (Moved before login container for better structure) -->
+  <!-- Google Login Button -->
   <button id="google-login-btn" class="btn btn-outline-theme">使用 Google 登入</button>
 
-  <!-- User Info Display (Moved near Google button) -->
+  <!-- User Info Display -->
   <div id="user-info"></div>
 
   <button class="btn language-btn" onclick="switchLanguage()">
@@ -108,21 +113,17 @@
     <!-- Name Section -->
     <div class="mb-4">
       <h2 class="fs-5" id="name-label">Enter Your Name</h2>
-      <div class="input-group mb-3">
-        <input type="text" id="name" class="form-control" placeholder="Your Name" required>
-        <button class="btn btn-outline-theme" onclick="confirmName()">Confirm</button>
-      </div>
-      <div id="name-feedback" class="invalid-feedback"></div>
+      <!-- Removed the input-group div as the button is gone -->
+      <input type="text" id="name" class="form-control mb-3" placeholder="Your Name" required>
+      <div id="name-feedback" class="invalid-feedback d-block"></div> <!-- Use d-block to always reserve space -->
     </div>
 
     <!-- Password Section -->
     <div class="mb-4">
       <h2 class="fs-5" id="password-label">Enter Password</h2>
-      <div class="input-group mb-3">
-        <input type="password" id="password" class="form-control" placeholder="Your Password" required>
-        <button class="btn btn-outline-theme" onclick="confirmPassword()">Confirm</button>
-      </div>
-      <div id="password-feedback" class="invalid-feedback"></div>
+      <!-- Removed the input-group div as the button is gone -->
+      <input type="password" id="password" class="form-control mb-3" placeholder="Your Password" required>
+      <div id="password-feedback" class="invalid-feedback d-block"></div> <!-- Use d-block to always reserve space -->
     </div>
 
     <button class="btn create-btn w-100" onclick="createSchedule()" id="create-btn">Create Your First Schedule</button>
