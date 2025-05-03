@@ -170,22 +170,26 @@
     </style>
 </head>
 <body>
-    <!-- User Icon Container -->
+    <!-- 目前不起作用  -->
+    <!-- 登入後持續顯示頭像 -->
     <div id="user-container">
         <img id="user-icon" src="./default-avatar.png" alt="User Avatar" title="Click to logout"> <!-- Default image, title for tooltip -->
     </div>
 
+    <!-- 標題 -->
     <h1 class="text-center">TIMEPICK</h1>
 
     <div class="container">
-        <!-- Timetable Name -->
+        <!-- 行程名稱 -->
         <div class="mb-4">
             <label for="timetable-name" class="form-label section-title">1. Timetable Name:</label>
             <input type="text" id="timetable-name" class="form-control" placeholder="e.g., Project Meeting, Study Group" required>
              <div class="invalid-feedback">Please enter a name for your timetable.</div>
         </div>
 
-        <!-- Available Time -->
+        <!-- 行程目的簡述 -->
+
+        <!-- 時間區段 -->
         <div class="mb-4">
             <span class="section-title">2. Select Available Time Range:</span>
             <div class="row g-3">
@@ -203,7 +207,7 @@
             <div id="time-error" class="invalid-feedback d-block mt-2"></div> <!-- Placeholder for time range error -->
         </div>
 
-        <!-- Date Selection -->
+        <!-- 日期區段 -->
         <div class="mb-4">
             <span class="section-title">3. Select Available Dates:</span>
             <div class="row g-3">
@@ -220,16 +224,16 @@
             </div>
         </div>
 
-        <!-- Confirm Button -->
+        <!-- 創建行程 -->
         <div class="text-center mt-4"> <!-- Added margin top -->
             <button id="confirm-btn" class="btn confirm-btn">Confirm and Proceed</button>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
+    <!-- Bootstrap JS套件 -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
-    <!-- Firebase and Custom JavaScript -->
+    <!-- Firebase 和 JS -->
     <script type="module">
         // --- Firebase Initialization and Auth ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"; // Use consistent version

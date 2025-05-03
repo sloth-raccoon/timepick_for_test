@@ -111,40 +111,43 @@
 </head>
 
 <body>
-
+  <!-- 標題 -->
   <h1 class="title">TIMEPICK</h1>
 
-  <!-- Google Login Button (JS 會控制顯示/隱藏) -->
+  <!-- Google 登入 -->
   <button id="google-login-btn" class="btn btn-outline-theme">使用 Google 登入</button>
 
-  <!-- User Info Display Area (JS 會填入頭像並顯示/隱藏) -->
+  <!-- 目前似乎不起作用 -->
+  <!-- JS 會填入頭像並顯示/隱藏 -->
   <div id="user-info"></div>
 
+  <!-- 切換語言 -->
   <button class="btn language-btn" onclick="switchLanguage()">
     <span id="lang-text">Switch Language</span>
   </button>
 
   <div class="login-container">
-    <!-- Name Section -->
+    <!-- 名稱 -->
     <div class="mb-4">
       <h2 class="fs-5" id="name-label">Enter Your Name</h2>
       <input type="text" id="name" class="form-control mb-3" placeholder="Your Name" required>
       <div id="name-feedback" class="invalid-feedback d-block"></div>
     </div>
 
-    <!-- Password Section -->
+    <!-- 密碼 -->
     <div class="mb-4">
       <h2 class="fs-5" id="password-label">Enter Password</h2>
       <input type="password" id="password" class="form-control mb-3" placeholder="Your Password" required>
       <div id="password-feedback" class="invalid-feedback d-block"></div>
     </div>
-
+    <!-- 創建行程 -->
     <button class="btn create-btn w-100" onclick="createSchedule()" id="create-btn">Create Your First Schedule</button>
   </div>
 
+  <!-- 操作說明按鈕 -->
   <button class="btn how-it-works" onclick="howItWorks()">How It Works</button>
 
-  <!-- Bootstrap JS -->
+  <!-- Bootstrap JS 套件 -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>

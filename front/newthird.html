@@ -168,7 +168,9 @@
 <body>
     <div class="layout">
         <div class="main" id="main">
+            <!-- header -->
             <div class="header">
+                <!-- 變更語言 -->
                 <div class="language-switcher">
                     <select id="language-select">
                         <option value="en">English</option>
@@ -176,13 +178,16 @@
                     </select>
                 </div>
             </div>
+            <!-- container -->
             <div class="container">
                 <div class="box">
+                    <!-- 標題 -->
                     <h3>My Time</h3>
                     <div class="legend">
                         <div class="color-box your-time-none" style="border: 1px solid #ccc;"></div> None
                         <div class="color-box your-time-available"></div> Available
                     </div>
+                    <!-- 表格 -->
                     <div class="table-wrapper">
                         <table id="your-table">
                             <thead>
@@ -191,6 +196,8 @@
                             <tbody><!-- Populated by JS --></tbody>
                         </table>
                     </div>
+
+                    <!-- 儲存 -->
                     <div class="button-container">
                         <button class="button" onclick="saveSchedule()">Save</button>
                     </div>
@@ -200,7 +207,7 @@
     </div>
 
     <script>
-        // --- JAVASCRIPT REMAINS UNCHANGED ---
+        // --- JS REMAINS UNCHANGED ---
         let isDragging = false;
         let currentDragState = null;
 
