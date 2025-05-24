@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TimePick</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #d7e7fd, #e2f3f2);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 40px 0;
+    }
+
+    .language-switcher {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+
+    .language-switcher select {
+      padding: 5px 10px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background-color: #ffffff;
+      font-size: 14px;
+    }
+
+    h1 {
+      font-family: 'Baloo 2', cursive;
+      font-size: 60px;
+      margin-top: -20px;
+      margin-bottom: 10px;
+      color: #4c4c6d;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+    }
+
+    .recent-timetables {
+      margin-bottom: 10px; /* 將此處從 20px 修改為 10px */
+      text-align: center;
+    }
+
+    .recent-timetables h2 {
+      font-size: 20px;
+      color: #334155;
+      margin-top: 0; /* 新增此行以移除 h2 預設的上邊距 */
+      margin-bottom: 10px;
+    }
+
+    .recent-timetables ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .recent-timetables li {
+      background-color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+
+    .recent-timetables li:hover {
+      background-color: #dbeafe;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 700px;
+      background-color: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+    }
+
+    .input-group, .time-select, .time-interval-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      color: #374151;
+    }
+
+    input, select {
+      padding: 12px;
+      font-size: 16px;
+      width: 100%;
+      max-width: 300px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      background-color: #f8fafc;
+      color: #334155;
+    }
+
+    input::placeholder {
+      color: #94a3b8;
+    }
+
+    span {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #1f2937;
+      font-size: 16px;
+    }
+
+    .calendar-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1px solid #e5e7eb;
+      padding: 10px;
+      border-radius: 12px;
+      background-color: #f9fafb;
+      width: 260px;
+      margin: 0 auto 20px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .calendar-header button {
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      color: #0b9bef;
+    }
+
+    .calendar-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+
+    .calendar-table th, .calendar-table td {
+      width: 30px;
+      height: 30px;
+      text-align: center;
+      border: 1px solid #e5e7eb;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .calendar-table td:not(.disabled):hover { /* 僅在非禁用日期上應用懸停效果 */
+      background-color: #e0f2fe;
+    }
+
+    .selected {
+      background-color: #0b9bef !important;
+      color: white;
+    }
+
+    /* 新增樣式以匹配 2.html 的邏輯 */
+    .calendar-table td.disabled {
+      background-color: #f0f0f0 !important; /* 淡灰色背景 */
+      color: #ccc !important; /* 淺灰色文字 */
+      cursor: not-allowed; /* 不允許點擊的鼠標樣式 */
+    }
+
+    .calendar-table td.not-current-month {
+      color: #aaa; /* 預覽日期的文字顏色調淡 */
+    }
+    .calendar-table td.not-current-month:not(.disabled):hover {
+      background-color: #e0f2fe; /* 如果預覽日期可選，保留懸停效果 */
+    }
+
+    .create-button {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    #create-btn {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #0b9bef;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #create-btn:hover {
+      background-color: #0284c7;
+    }
+  </style>
+</head>
+<body>
+
+<div class="language-switcher">
+  <select id="language-select">
+    <option value="en">English</option>
+    <option value="zh">繁體中文</option>
+  </select>
+</div>
+
+<h1>TIMEPICK</h1>
+
+<div class="recent-timetables">
+  <h2>Recent Timetables</h2>
+  <ul id="recent-list"></ul>
+</div>
+
+<div class="container">
+  <div class="input-group">
+    <label for="timetable-name" id="label-timetable">1. Timetable Name:</label>
+    <input type="text" id="timetable-name" placeholder="Enter name">
+  </div>
+
+  <div class="input-group">
+    <label for="timetable-description" id="label-description">Description:</label>
+    <input type="text" id="timetable-description" placeholder="Enter description">
+  </div>
+
+  <div>
+    <span id="label-time">2. Select Available Time:</span>
+    <div class="time-select">
+      <label for="available-time" id="label-from">From:</label>
+      <select id="available-time"></select>
+      <label for="end-time" id="label-to">To:</label>
+      <select id="end-time"></select>
+    </div>
+
+    <div class="time-interval-group">
+      <label for="time-interval" id="label-interval">Time Interval:</label>
+      <select id="time-interval">
+        <option value="15">15 minutes</option>
+        <option value="30" selected>30 minutes</option>
+        <option value="45">45 minutes</option>
+        <option value="60">1 hour</option>
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <span id="label-date">3. Select Dates:</span>
+    <div class="calendar-container" id="calendar"></div>
+  </div>
+
+  <div class="create-button">
+    <button id="create-btn">Create</button>
+  </div>
+</div>
+
+<script>
+  const translations = {
+    en: {
+      timetable: "1. Timetable Name:",
+      description: "Description:",
+      timeSelect: "2. Select Available Time:",
+      from: "From:",
+      to: "To:",
+      dateSelect: "3. Select Dates:",
+      create: "Create",
+      placeholder: "Enter name",
+      placeholderDesc: "Enter description",
+      interval: "Time Interval:",
+      intervalOptions: ["15 minutes", "30 minutes", "45 minutes", "1 hour"],
+      recentTitle: "Recent Timetables",
+      alertName: "Please enter the timetable name.",
+      alertFrom: "Please select the start time.",
+      alertTo: "Please select the end time.",
+      alertTimeOrder: "Start time must be earlier than end time.",
+      alertDate: "Please select at least one date.",
+      weekdays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    },
+    zh: {
+      timetable: "1. 時間表名稱：",
+      description: "描述：",
+      timeSelect: "2. 選擇可用時間：",
+      from: "從：",
+      to: "到：",
+      dateSelect: "3. 選擇日期：",
+      create: "確認",
+      placeholder: "輸入名稱",
+      placeholderDesc: "輸入描述",
+      interval: "時間間隔：",
+      intervalOptions: ["15分鐘", "30分鐘", "45分鐘", "1 小時"],
+      recentTitle: "最近的時間表",
+      alertName: "請輸入時間表名稱。",
+      alertFrom: "請選擇開始時間。",
+      alertTo: "請選擇結束時間。",
+      alertTimeOrder: "開始時間必須早於結束時間。",
+      alertDate: "請選擇至少一個日期。",
+      weekdays: ["週日", "週一", "週二", "週三", "週四", "週五", "週六"],
+      months: ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"]
+    }
+  };
+
+  let currentLang = "en";
+
+  function updateLanguage(lang) {
+    currentLang = lang;
+    const t = translations[lang];
+
+    document.getElementById("label-timetable").textContent = t.timetable;
+    document.getElementById("label-description").textContent = t.description;
+    document.getElementById("label-time").textContent = t.timeSelect;
+    document.getElementById("label-from").textContent = t.from;
+    document.getElementById("label-to").textContent = t.to;
+    document.getElementById("label-date").textContent = t.dateSelect;
+    document.getElementById("create-btn").textContent = t.create;
+    document.getElementById("timetable-name").placeholder = t.placeholder;
+    document.getElementById("timetable-description").placeholder = t.placeholderDesc;
+    document.getElementById("label-interval").textContent = t.interval;
+
+    // Update Time Interval Options
+    const intervalSelect = document.getElementById("time-interval");
+    intervalSelect.innerHTML = "";
+    t.intervalOptions.forEach((opt, i) => {
+      const option = document.createElement("option");
+      option.value = [15, 30, 45, 60][i];
+      option.textContent = opt;
+      if ([15,30,45,60][i] === 30) option.selected = true;
+      intervalSelect.appendChild(option);
+    });
+
+    // Update Recent Timetables title and list
+    document.querySelector(".recent-timetables h2").textContent = t.recentTitle;
+    renderRecentTimetables();
+
+    generateCalendar(currentYear, currentMonth);
+  }
+
+  function renderRecentTimetables() {
+  const recentList = document.getElementById("recent-list");
+  recentList.innerHTML = "";
+
+  const recents = ["Team Project", "Work Schedule", "Study Plan"];
+  recents.forEach(name => {
+    const li = document.createElement("li");
+    li.textContent = name;
+    li.addEventListener("click", () => {
+      // navigate to the timetable page for this name
+      window.location.href = `/timetable/${encodeURIComponent(name)}`;
+    });
+    recentList.appendChild(li);
+  });
+}
+
+  // Time select options
+  function populateTimeOptions() {
+    const availableTime = document.getElementById("available-time");
+    const endTime = document.getElementById("end-time");
+
+    availableTime.innerHTML = "";
+    endTime.innerHTML = "";
+
+    for (let hour = 0; hour < 24; hour++) {
+      const timeStr = (hour < 10 ? "0" : "") + hour + ":00";
+      const optionFrom = document.createElement("option");
+      optionFrom.value = timeStr;
+      optionFrom.textContent = timeStr;
+      availableTime.appendChild(optionFrom);
+
+      const optionTo = document.createElement("option");
+      optionTo.value = timeStr;
+      optionTo.textContent = timeStr;
+      endTime.appendChild(optionTo);
+    }
+
+    availableTime.selectedIndex = 0;
+    endTime.selectedIndex = 0;
+  }
+
+  // Calendar generation and management
+  let currentYear, currentMonth;
+  let selectedDates = new Set();
+  const today = new Date(); //定義 today
+  today.setHours(0, 0, 0, 0); // 將時間標準化為當天的開始，以便比較
+
+  function generateCalendar(year, month) {
+    currentYear = year;
+    currentMonth = month;
+
+    const t = translations[currentLang];
+    const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 (Sun) - 6 (Sat)
+    const daysInCurrentMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate(); // 上個月的總天數
+
+    const calendar = document.getElementById("calendar");
+    calendar.innerHTML = "";
+
+    // Calendar header with month and navigation buttons
+    const header = document.createElement("div");
+    header.classList.add("calendar-header");
+    const prevBtn = document.createElement("button");
+    prevBtn.textContent = "<";
+    prevBtn.onclick = () => {
+      if (month === 0) {
+        generateCalendar(year - 1, 11);
+      } else {
+        generateCalendar(year, month - 1);
+      }
+    };
+    const nextBtn = document.createElement("button");
+    nextBtn.textContent = ">";
+    nextBtn.onclick = () => {
+      if (month === 11) {
+        generateCalendar(year + 1, 0);
+      } else {
+        generateCalendar(year, month + 1);
+      }
+    };
+    const monthYear = document.createElement("span");
+    monthYear.textContent = `${t.months[month]} ${year}`;
+    header.appendChild(prevBtn);
+    header.appendChild(monthYear);
+    header.appendChild(nextBtn);
+
+    calendar.appendChild(header);
+
+    // Build calendar table
+    const table = document.createElement("table");
+    table.classList.add("calendar-table");
+    // Weekday header
+    const thead = document.createElement("thead");
+    const trHead = document.createElement("tr");
+    t.weekdays.forEach(day => {
+      const th = document.createElement("th");
+      th.textContent = day;
+      trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+    table.appendChild(thead);
+
+    // Days
+    const tbody = document.createElement("tbody");
+    let dateCounter = 1; // 當前月份的日期計數器
+    let nextMonthDateCounter = 1; // 下個月預覽日期的計數器
+
+    for (let i = 0; i < 6; i++) { // 一個月最多需要6行來顯示
+      const tr = document.createElement("tr");
+      for (let j = 0; j < 7; j++) { // 每週7天
+        const td = document.createElement("td");
+        let cellDateObj;
+        let dateKey;
+        let cellText;
+
+        if (i === 0 && j < firstDayOfMonth) {
+          // 顯示上個月的日期
+          const dayOfPrevMonth = daysInPrevMonth - firstDayOfMonth + j + 1;
+          cellText = dayOfPrevMonth;
+          const prevMonthActual = (month === 0) ? 11 : month - 1;
+          const prevYearActual = (month === 0) ? year - 1 : year;
+          cellDateObj = new Date(prevYearActual, prevMonthActual, dayOfPrevMonth);
+          dateKey = `${prevYearActual}-${String(prevMonthActual + 1).padStart(2, '0')}-${String(dayOfPrevMonth).padStart(2, '0')}`;
+          td.classList.add("not-current-month");
+        } else if (dateCounter > daysInCurrentMonth) {
+          // 顯示下個月的日期
+          cellText = nextMonthDateCounter;
+          const nextMonthActual = (month === 11) ? 0 : month + 1;
+          const nextYearActual = (month === 11) ? year + 1 : year;
+          cellDateObj = new Date(nextYearActual, nextMonthActual, nextMonthDateCounter);
+          dateKey = `${nextYearActual}-${String(nextMonthActual + 1).padStart(2, '0')}-${String(nextMonthDateCounter).padStart(2, '0')}`;
+          td.classList.add("not-current-month");
+          nextMonthDateCounter++;
+        } else {
+          // 顯示當前月份的日期
+          cellText = dateCounter;
+          cellDateObj = new Date(year, month, dateCounter);
+          // 標準化 dateKey 為 YYYY-MM-DD 格式
+          dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(dateCounter).padStart(2, '0')}`;
+          dateCounter++;
+        }
+
+        td.textContent = cellText;
+        td.dataset.date = dateKey; // 將標準化後的 dateKey 存儲到 data 屬性
+
+        if (cellDateObj < today) {
+          td.classList.add("disabled"); // 如果日期早於今天，則禁用
+        }
+
+        if (selectedDates.has(dateKey)) {
+          td.classList.add("selected");
+        }
+
+        td.onclick = () => {
+          if (td.classList.contains('disabled')) return; // 如果日期被禁用，則不執行任何操作
+          const clickedDateKey = td.dataset.date; // 從 data 屬性獲取 dateKey
+          if (selectedDates.has(clickedDateKey)) {
+            selectedDates.delete(clickedDateKey);
+            td.classList.remove("selected");
+          } else {
+            selectedDates.add(clickedDateKey);
+            td.classList.add("selected");
+          }
+        };
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+      // 如果當前月份的日期已全部渲染完畢，且下個月的預覽日期也開始渲染，則可以提前結束外層循環
+      if (dateCounter > daysInCurrentMonth && i >= Math.ceil((firstDayOfMonth + daysInCurrentMonth) / 7) -1 ) {
+          break;
+      }
+    }
+    table.appendChild(tbody);
+    calendar.appendChild(table);
+  }
+
+  // Create button click handler (just example alert)
+  document.getElementById("create-btn").addEventListener("click", () => {
+    const t = translations[currentLang];
+
+    const name = document.getElementById("timetable-name").value.trim();
+    const fromTime = document.getElementById("available-time").value;
+    const toTime = document.getElementById("end-time").value;
+    const description = document.getElementById("timetable-description").value.trim();
+    const timeInterval = document.getElementById("time-interval").value;
+
+    if (!name) {
+      alert(t.alertName);
+      return;
+    }
+    if (!fromTime) {
+      alert(t.alertFrom);
+      return;
+    }
+    if (!toTime) {
+      alert(t.alertTo);
+      return;
+    }
+    // 驗證開始時間是否早於結束時間
+    const fromTimeHour = parseInt(fromTime.split(':')[0]);
+    const toTimeHour = parseInt(toTime.split(':')[0]);
+    if (fromTimeHour >= toTimeHour && !(fromTimeHour === 0 && toTimeHour === 0)) { // 允許 00:00 到 00:00 (在MakeTime中會是空時間段)
+        alert(t.alertTimeOrder);
+        return;
+    }
+    if (selectedDates.size === 0) {
+      alert(t.alertDate);
+      return;
+    }
+
+    // 準備要保存到 localStorage 的資料
+    const scheduleSetupData = {
+        name: name,
+        description: description,
+        fromTime: fromTime,
+        toTime: toTime,
+        timeInterval: timeInterval,
+        // 對日期進行排序以確保一致性，儘管 MakeTime.html 也會排序
+        dates: Array.from(selectedDates).sort((a, b) => new Date(a.replace(/-/g, '/')) - new Date(b.replace(/-/g, '/')))
+    };
+    try {
+        localStorage.setItem('setUpDate_data', JSON.stringify(scheduleSetupData));
+        console.log("Data saved to localStorage for MakeTime.html:", scheduleSetupData);
+        window.location.href = 'MakeTime.html'; // 重定向到下一頁
+    } catch (error) {
+        console.error("Error saving data to localStorage:", error);
+        alert("An error occurred while saving your setup. Please try again.");
+    }
+  });
+
+  // Language switch event
+  document.getElementById("language-select").addEventListener("change", e => {
+    updateLanguage(e.target.value);
+  });
+
+  // Initialization
+  function init() {
+    populateTimeOptions();
+    renderRecentTimetables();
+
+    generateCalendar(today.getFullYear(), today.getMonth()); // 使用全局 today 變量
+
+    updateLanguage(currentLang);
+  }
+
+  init();
+
+</script>
+
+</body>
+</html>

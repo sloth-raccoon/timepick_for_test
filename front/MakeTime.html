@@ -1,0 +1,403 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TimePick</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #d7e7fd, #e2f3f2); /* Consistent background */
+      display: flex;
+      flex-direction: column; /* Stack elements vertically */
+      align-items: center; /* Center content horizontally */
+      min-height: 100vh;
+    }
+    .main-content-area { /* Renamed .main to avoid conflict with a potential main semantic tag, and for clarity */
+      width: 1000px;
+      background: white;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 20px; /* 保持內部元素的間距 */
+      margin-top: 0px; /* 將此處改為0px，以減少與上方TIMEPICK標題的間距 */
+    }
+    .header {
+      display: flex;
+      /* justify-content: space-between; */
+      align-items: center;
+      background-color: #2196f3;
+      padding: 10px 20px;
+      border-radius: 8px;
+    }
+    .header .left-buttons,
+    .header .right-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .button {
+      border: none;
+      font-size: 16px;
+      color: white;
+      border-radius: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      background-color: #0b9bef;
+    }
+    .button:hover {
+      background-color: #3b82f6; /* Consistent hover effect */
+    }
+    .header select {
+      padding: 5px 10px; /* Smaller padding for select */
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background-color: #ffffff;
+      font-size: 14px;
+      color: #333; /* Ensure text is visible */
+    }
+    .site-title-main { /* Style for the new global TIMEPICK title */
+      font-family: 'Baloo 2', cursive;
+      font-size: 60px;
+      color: #4c4c6d;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-align: center;
+      margin-top: 30px; /* Space from the top of the viewport */
+      margin-bottom: 10px; /* Space before the main content area */
+    }
+
+    h1#mainTitle { /* Made the existing h1 selector specific to the schedule title */
+      text-align: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* 更新字體以匹配 SetUpDate.html 的 Recent Timetables */
+      color: #334155; /* 新增顏色以匹配 SetUpDate.html 的 Recent Timetables */
+      font-weight: 700;
+      font-size: 60px;
+      margin: 0 0 5px 0; /* 調整標題下方的邊距，為描述文字留出空間 */
+      letter-spacing: 1.2px;
+      white-space: nowrap; 
+    }
+    .container {
+      display: flex;
+      gap: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+    .box {
+      flex: 1;
+      border: 1px solid #cbd5e1;;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    h3 { /* Add style for h3 */
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 18px; /* Similar to h2 in other pages */
+      color: #374151; /* Similar color */
+      margin-bottom: 8px; /* Add some space below heading */
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      text-align: center;
+      padding: 5px;
+      cursor: pointer;
+    }
+    .legend {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+    .color-box {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    input::placeholder { 
+      color: #94a3b8;
+    }
+    .schedule-description { /* 新增描述段落的樣式 */
+      text-align: center;
+      font-size: 30px;
+      color: #4a5568; /* 使用一個略微柔和的顏色 */
+      margin-top: 0px; /* 調整使其更靠近標題 */
+      margin-bottom: 15px; /* 在描述和下方表格容器之間增加間距 */
+      padding: 0 20px; /* 如果描述很長，增加一些水平內邊距 */
+      word-wrap: break-word; /* 確保長描述能正確換行 */
+    }
+  </style>
+</head>
+<body>
+  <h1 class="site-title-main">TIMEPICK</h1>
+
+  <div class="main-content-area">
+    <div class="header">
+      <div class="left-buttons">
+        <button id="btnNew" class="button" onclick="location.reload()">New</button>
+        <button id="btnShare" class="button">Share</button>
+      </div>
+      <div class="right-buttons">
+        <select class="button" onchange="changeLanguage(this.value)">
+          <option value="en">EN</option>
+          <option value="zh-TW">繁體中文</option>
+        </select>
+      </div>
+    </div>
+
+    <h1 id="mainTitle">TIMETABLE</h1>
+    <p id="scheduleDescription" class="schedule-description"></p> <!-- 用於顯示描述的元素 -->
+
+    <div class="container">
+      <div class="box">
+        <h3 id="myTimeLabel">My Time</h3>
+        <div class="legend">
+          <div class="color-box selected" style="background-color: #b3e5fc;"></div> <!-- 修改為新的淺藍色 -->
+          <div class="color-box" style="background-color: #ffffff;"></div>
+        </div>
+        <table id="your-table"></table>
+      </div>
+      <div class="box">
+        <h3 id="groupLabel">Group Availability</h3>
+        <div class="legend">
+          <div class="color-box" style="background-color: #ffffff;"></div>
+          <div class="color-box" style="background-color: #e3f2fd;"></div> <!-- 非常淺的藍色 -->
+          <div class="color-box" style="background-color: #b3e5fc;"></div> <!-- 淺藍色 -->
+          <div class="color-box" style="background-color: #42a5f5;"></div> <!-- 中等藍色 -->
+          <div class="color-box" style="background-color: #1e88e5;"></div> <!-- 深藍色 -->
+        </div>
+        <table id="group-table"></table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 用於存儲來自 SetUpDate.html 的數據或預設值的全域變數
+    let initialTimetableName = "TIMETABLE"; // 預設時間表名稱
+    let initialStartHour = 9; // 預設開始小時
+    let initialEndHour = 17;   // 預設結束小時 (不包含)
+    let initialInterval = 30;  // 預設時間間隔 (分鐘)
+    let initialSelectedDates = []; // 存儲從 SetUpDate.html 選擇的日期
+
+    let initialDescription = ""; // 存儲描述供將來使用
+
+    function loadDataFromPreviousPage() {
+      const savedDataString = localStorage.getItem('setUpDate_data');
+      if (savedDataString) {
+        try {
+          const scheduleData = JSON.parse(savedDataString);
+          console.log("Loaded data from SetUpDate.html:", scheduleData);
+
+          initialTimetableName = scheduleData.name || initialTimetableName;
+          initialDescription = scheduleData.description || "";
+
+          if (scheduleData.fromTime) {
+            initialStartHour = parseInt(scheduleData.fromTime.split(':')[0], 10);
+          }
+          if (scheduleData.toTime) {
+            initialEndHour = parseInt(scheduleData.toTime.split(':')[0], 10);
+          }
+          if (scheduleData.timeInterval) {
+            initialInterval = parseInt(scheduleData.timeInterval, 10);
+          }
+          if (scheduleData.dates && Array.isArray(scheduleData.dates)) {
+            initialSelectedDates = scheduleData.dates;
+          }
+
+          // 可選：如果這是一次性傳輸，並且不希望刷新頁面時重新加載，則清除該項目
+          // localStorage.removeItem('setUpDate_data');
+
+        } catch (e) {
+          console.error("Error parsing schedule data from localStorage:", e);
+          // 回退到已設定的預設值
+        }
+      } else {
+        console.log("No schedule data found in localStorage from SetUpDate.html, using defaults.");
+      }
+      // 加載或使用預設值後更新 DOM 元素
+      if (document.getElementById('mainTitle')) {
+        document.getElementById('mainTitle').textContent = initialTimetableName;
+      }
+      // 更新描述的 DOM 元素
+      const descriptionElement = document.getElementById('scheduleDescription');
+      if (descriptionElement) {
+        descriptionElement.textContent = initialDescription;
+      }
+    }
+
+    function generateTables() {
+      const interval = initialInterval;
+      const startHour = initialStartHour;
+      const endHour = initialEndHour;
+      const times = [];
+
+      if (endHour <= startHour && !(startHour === 0 && endHour === 0) ) { // 時間範圍跨越午夜 (例如 22:00 到 02:00)
+        // 從 startHour 到 23:xx 的時間
+        for (let hour = startHour; hour < 24; hour++) {
+          for (let min = 0; min < 60; min += interval) {
+            times.push(`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`);
+          }
+        }
+        // 從 00:00 到 (但不包括) endHour 的時間
+        for (let hour = 0; hour < endHour; hour++) {
+          for (let min = 0; min < 60; min += interval) {
+            times.push(`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`);
+          }
+        }
+      } else { // 時間範圍在一天內 (或處理 00:00 到 00:00 的特殊情況作為空)
+        if (startHour === 0 && endHour === 0) {
+            // 如果開始和結束都是00:00，則不生成時間，或者根據需求定義行為
+        } else {
+            for (let hour = startHour; hour < endHour; hour++) {
+                for (let min = 0; min < 60; min += interval) {
+                    times.push(`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`);
+                }
+            }
+        }
+      }
+      
+      const timeLabel = window.currentTimeLabel || "Time";
+
+      // 按時間順序對完整的日期字串進行排序
+      const sortedFullDates = (initialSelectedDates || [])
+        .slice() // 創建副本
+        .sort((a, b) => {
+            // 將 YYYY-M-D 或 YYYY-MM-DD 轉換為 Date 物件進行比較
+            // 替換 '-' 為 '/' 以獲得更好的跨瀏覽器 Date 解析兼容性
+            const dateA = new Date(a.replace(/-/g, '/'));
+            const dateB = new Date(b.replace(/-/g, '/'));
+            return dateA - dateB;
+        });
+
+      let yourTableHTML = `<thead><tr><th>${timeLabel}</th>`;
+      sortedFullDates.forEach(fullDateStr => {
+        const parts = fullDateStr.split('-'); // 預期格式 YYYY-M-D 或 YYYY-MM-DD
+        const displayMonth = parts[1].padStart(2, '0'); // 確保月份是兩位數
+        const displayDay = parts[2].padStart(2, '0');   // 確保日期是兩位數
+        yourTableHTML += `<th>${displayMonth}/${displayDay}</th>`;
+      });
+      yourTableHTML += '</tr></thead><tbody>';
+
+      let groupTableHTML = `<thead><tr><th>${timeLabel}</th>`;
+      sortedFullDates.forEach(fullDateStr => {
+        const parts = fullDateStr.split('-');
+        const displayMonth = parts[1].padStart(2, '0');
+        const displayDay = parts[2].padStart(2, '0');
+        groupTableHTML += `<th>${displayMonth}/${displayDay}</th>`;
+      });
+      groupTableHTML += '</tr></thead><tbody>';
+
+      if (times.length === 0 || sortedFullDates.length === 0) {
+        const message = times.length === 0 ? "未定義時間段 (請檢查開始/結束時間和間隔)。" : "未選擇日期。";
+        const colspan = Math.max(sortedFullDates.length + 1, 1); // +1 是因為時間列
+        yourTableHTML += `<tr><td colspan="${colspan}">${message}</td></tr>`;
+        groupTableHTML += `<tr><td colspan="${colspan}">${message}</td></tr>`;
+      } else {
+        times.forEach(time => {
+          yourTableHTML += `<tr><td>${time}</td>`;
+          groupTableHTML += `<tr><td>${time}</td>`;
+          sortedFullDates.forEach(dateStr => { // 使用完整的日期字串作為 data 屬性
+            yourTableHTML += `<td onclick='toggleMyTimeColor(this)' data-date='${dateStr}' data-time='${time}'></td>`;
+            groupTableHTML += `<td onclick='cycleGroupColor(this)' data-date='${dateStr}' data-time='${time}'></td>`;
+          });
+          yourTableHTML += '</tr>';
+          groupTableHTML += '</tr>';
+        });
+      }
+      yourTableHTML += '</tbody>';
+      groupTableHTML += '</tbody>';
+
+      document.getElementById('your-table').innerHTML = yourTableHTML;
+      document.getElementById('group-table').innerHTML = groupTableHTML;
+      
+    }
+
+    const myTimeColors = ['#ffffff', '#b3e5fc']; // 將選取顏色從淺綠色改為淺藍色
+
+    function toggleMyTimeColor(cell) {
+      const current = rgbToHex(cell.style.backgroundColor || '#ffffff');
+      const index = myTimeColors.indexOf(current);
+      const nextColor = myTimeColors[(index + 1) % myTimeColors.length];
+      cell.style.backgroundColor = nextColor;
+
+      // 同步到 Group Availability 表格
+      const date = cell.dataset.date;
+      const time = cell.dataset.time;
+      const groupCellSelector = `#group-table td[data-date="${date}"][data-time="${time}"]`;
+      const groupCell = document.querySelector(groupCellSelector);
+
+      if (groupCell) {
+        if (nextColor === myTimeColors[1]) { // 如果 My Time 被選中
+          groupCell.style.backgroundColor = groupColors[1]; // Group Time 顯示第一級選中
+        } else { // 如果 My Time 被取消選中
+          groupCell.style.backgroundColor = groupColors[0]; // Group Time 恢復成未選中
+        }
+      }
+    }
+
+    const groupColors = ['#ffffff', '#e3f2fd', '#90caf9', '#42a5f5', '#1e88e5']; // 更新為藍色系
+
+    function cycleGroupColor(cell) {
+      const current = rgbToHex(cell.style.backgroundColor || '#ffffff');
+      const index = groupColors.indexOf(current);
+      const nextColor = groupColors[(index + 1) % groupColors.length];
+      cell.style.backgroundColor = nextColor;
+    }
+
+    function rgbToHex(rgb) {
+      if (!rgb.startsWith('rgb')) return rgb;
+      const [r, g, b] = rgb.match(/\d+/g).map(Number);
+      return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+
+    function changeLanguage(lang) {
+      const labels = {
+        en: {
+          myTimeLabel: "My Time",
+          groupLabel: "Group Availability",
+          btnNew: "New",
+          btnShare: "Share",
+          mainTitle: "TIMETABLE",
+          days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+          time: "Time"
+        },
+        'zh-TW': {
+          myTimeLabel: "我的時間",
+          groupLabel: "團體時間",
+          btnNew: "新增",
+          btnShare: "分享",
+          mainTitle: "時間表",
+          time: "時間"
+        }
+      };
+      const t = labels[lang] || labels['en'];
+
+      document.getElementById('myTimeLabel').textContent = t.myTimeLabel;
+      document.getElementById('groupLabel').textContent = t.groupLabel;
+      document.getElementById('btnNew').textContent = t.btnNew;
+      document.getElementById('btnShare').textContent = t.btnShare;
+      document.getElementById('mainTitle').textContent = initialTimetableName || t.mainTitle;
+
+      window.currentTimeLabel = t.time;
+      loadDataFromPreviousPage();
+      generateTables();
+    }
+
+    window.onload = () => {
+      changeLanguage('en');
+    };
+  </script>
+</body>
+</html>
